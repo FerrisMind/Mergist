@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Repo to Markdown — Desktop",
+    "title": "Mergist",
     "tabs": {
       "code": "Código para MD",
       "issues": "Issues para MD"
@@ -11,7 +11,19 @@
     "minimize": "Minimizar",
     "close": "Fechar",
     "about": "Sobre",
-    "aboutMessage": "{name}{version}"
+    "aboutMessage": "{name}{version}",
+    "aboutDeveloper": "Desenvolvedor: {developer}",
+    "aboutLicense": "Licença: {license}",
+    "checkUpdates": "Verificar atualizações",
+    "updatesChecking": "Verificando atualizações…",
+    "updatesCheckingShort": "Verificando…",
+    "updatesLatest": "Você já está na versão mais recente",
+    "updatesError": "Não foi possível verificar atualizações",
+    "updateAvailable": "Atualização disponível: v{version}",
+    "updateInstall": "Instalar",
+    "updateLater": "Depois",
+    "updateDownloading": "Baixando atualização...",
+    "updateRestart": "Reinicie para concluir a atualização"
   },
   "repoForm": {
     "label": "Repositório GitHub",

@@ -1,4 +1,4 @@
-# Repo to Markdown — Desktop (Tauri + Svelte)
+# Mergist (Tauri + Svelte)
 
 Кроссплатформенное десктоп‑приложение, которое превращает репозиторий GitHub в Markdown‑экспорт (код и задачи) с прогрессом, темизацией и локализацией.
 
