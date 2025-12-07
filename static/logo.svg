@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 2048 2048">
+  <defs>
+    <linearGradient id="New_Gradient_Swatch_1" data-name="New Gradient Swatch 1" x1="545.28" y1="802.84" x2="545.28" y2="1668.78" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4f46e5"/>
+      <stop offset="1" stop-color="#7c3aed"/>
+    </linearGradient>
+    <radialGradient id="radial-gradient" cx="258.05" cy="661.35" fx="258.05" fy="661.35" r="191.49" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7c3aed"/>
+      <stop offset="1" stop-color="#4f46e5"/>
+    </radialGradient>
+    <radialGradient id="radial-gradient-2" cx="258.05" cy="661.35" fx="258.05" fy="661.35" r="211.49" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#783bec"/>
+      <stop offset="1" stop-color="#4f46e5"/>
+    </radialGradient>
+    <linearGradient id="New_Gradient_Swatch_1-2" data-name="New Gradient Swatch 1" x1="1502.72" y1="802.84" x2="1502.72" xlink:href="#New_Gradient_Swatch_1"/>
+    <radialGradient id="radial-gradient-3" cx="1789.95" cy="661.35" fx="1789.95" fy="661.35" r="191.49" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7c3aed"/>
+      <stop offset="1" stop-color="#5046e5"/>
+    </radialGradient>
+    <radialGradient id="radial-gradient-4" cx="1789.95" cy="661.35" fx="1789.95" fy="661.35" r="211.49" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7c3aed"/>
+      <stop offset="1" stop-color="#4f46e5"/>
+    </radialGradient>
+    <radialGradient id="radial-gradient-5" cx="1024" cy="1427.3" fx="1024" fy="1427.3" r="191.49" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4f46e5"/>
+      <stop offset="1" stop-color="#7c3aed"/>
+    </radialGradient>
+    <radialGradient id="radial-gradient-6" cx="1024" cy="1427.3" fx="1024" fy="1427.3" r="211.49" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4f46e5"/>
+      <stop offset="1" stop-color="#7c3aed"/>
+    </radialGradient>
+  </defs>
+  <g id="Layer_1" data-name="Layer 1">
+    <g>
+      <path d="M258.05,1618.78v-765.95c0,317.27,257.19,574.46,574.46,574.46" fill="none" stroke="url(#New_Gradient_Swatch_1)" stroke-linecap="round" stroke-linejoin="round" stroke-width="100"/>
+      <circle cx="258.05" cy="661.35" r="191.49" fill="url(#radial-gradient)" stroke="url(#radial-gradient-2)" stroke-linecap="round" stroke-linejoin="round" stroke-width="40"/>
+    </g>
+  </g>
+  <g id="Layer_3" data-name="Layer 3">
+    <g>
+      <path d="M1789.95,1618.78v-765.95c0,317.27-257.19,574.46-574.46,574.46" fill="none" stroke="url(#New_Gradient_Swatch_1-2)" stroke-linecap="round" stroke-linejoin="round" stroke-width="100"/>
+      <circle cx="1789.95" cy="661.35" r="191.49" fill="url(#radial-gradient-3)" stroke="url(#radial-gradient-4)" stroke-linecap="round" stroke-linejoin="round" stroke-width="40"/>
+      <circle cx="1024" cy="1427.3" r="191.49" fill="url(#radial-gradient-5)" stroke="url(#radial-gradient-6)" stroke-linecap="round" stroke-linejoin="round" stroke-width="40"/>
+    </g>
+  </g>
+</svg>
