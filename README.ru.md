@@ -1,3 +1,7 @@
+[![README EN](https://img.shields.io/badge/README-EN-cbd5e1?style=flat&logo=markdown&logoColor=374151&labelColor=0f172a)](README.md)
+[![README RU](https://img.shields.io/badge/README-RU-0ea5e9?style=flat&logo=markdown&logoColor=white&labelColor=0f172a)](README.ru.md)
+[![README PT-BR](https://img.shields.io/badge/README-PT--BR-cbd5e1?style=flat&logo=markdown&logoColor=374151&labelColor=0f172a)](README.pt-BR.md)
+
 ![Mergist](.github/assets/logo.svg)
 
 Кроссплатформенное десктоп‑приложение, которое превращает репозиторий GitHub в Markdown‑экспорт (код и задачи) с прогрессом, темизацией и локализацией.
