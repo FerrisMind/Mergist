@@ -25,22 +25,18 @@
     progress = null;
 
     try {
-      const result = await toast.promise(checkForUpdates(), {
-        id: 'check-updates',
-        loading: $t('app.updatesChecking'),
-        success: (res) =>
-          res?.available
-            ? $t('app.updateAvailable', { values: { version: res.version ?? '' } })
-            : $t('app.updatesLatest'),
-        error: $t('app.updatesError'),
-      });
-
+      const result = await checkForUpdates();
       if (result.available) {
         update = result;
         availableVersion = result.version ?? '';
+        toast.success($t('app.updateAvailable', { values: { version: availableVersion } }));
       } else {
         update = null;
+        toast.success($t('app.updatesLatest'));
       }
+    } catch (err) {
+      console.error(err);
+      toast.error($t('app.updatesError'));
     } finally {
       checking = false;
     }

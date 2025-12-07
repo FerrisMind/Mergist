@@ -3,7 +3,7 @@ import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { save } from '@tauri-apps/plugin-dialog';
 import { copyFile } from '@tauri-apps/plugin-fs';
 import { relaunch } from '@tauri-apps/plugin-process';
-import { check as checkUpdate } from '@tauri-apps/plugin-updater';
+import { check as checkUpdate, type DownloadEvent } from '@tauri-apps/plugin-updater';
 import type {
   ConversionResult,
   ConvertOptions,
@@ -87,11 +87,11 @@ export async function tokenizeFile(
 }
 
 export type UpdateDownloadProgress = {
-  event: string;
+  event: DownloadEvent['event'];
   percent?: number;
   downloadedBytes?: number;
   totalBytes?: number;
-  bytesPerSecond?: number;
+  chunkBytes?: number;
 };
 
 export type UpdateCheckResult = {
@@ -103,30 +103,47 @@ export type UpdateCheckResult = {
 export async function checkForUpdates(): Promise<UpdateCheckResult> {
   try {
     const update = await checkUpdate();
-    if (!update || !update.available) {
+    if (!update) {
       return { available: false };
     }
-    const version = update.version ?? update.manifest?.version;
+    const version = update.version ?? update.currentVersion;
     return {
       available: true,
       version,
       async downloadAndInstall(onProgress) {
+        let total = 0;
+        let downloaded = 0;
         await update.downloadAndInstall((event) => {
           if (!onProgress) return;
-          if (event.event === 'Progress') {
-            const total = event.totalBytes ?? event.contentLength ?? 0;
-            const downloaded = event.downloadedBytes ?? 0;
-            const percent =
-              event.percent ?? (total > 0 ? Math.min(100, (downloaded / total) * 100) : undefined);
+          if (event.event === 'Started') {
+            total = event.data.contentLength ?? 0;
             onProgress({
-              event: event.event,
-              percent,
-              downloadedBytes: downloaded,
-              totalBytes: total,
-              bytesPerSecond: event.bytesPerSecond,
+              event: 'Started',
+              totalBytes: total || undefined,
+              downloadedBytes: 0,
+              percent: total ? 0 : undefined,
             });
-          } else {
-            onProgress({ event: event.event });
+            return;
+          }
+          if (event.event === 'Progress') {
+            downloaded += event.data.chunkLength ?? 0;
+            const percent = total > 0 ? Math.min(100, (downloaded / total) * 100) : undefined;
+            onProgress({
+              event: 'Progress',
+              chunkBytes: event.data.chunkLength ?? 0,
+              downloadedBytes: downloaded,
+              totalBytes: total || undefined,
+              percent,
+            });
+            return;
+          }
+          if (event.event === 'Finished') {
+            onProgress({
+              event: 'Finished',
+              downloadedBytes: downloaded || undefined,
+              totalBytes: total || undefined,
+              percent: total ? 100 : undefined,
+            });
           }
         });
       },
