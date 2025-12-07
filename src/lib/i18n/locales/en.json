@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Repo to Markdown — Desktop",
+    "title": "Mergist",
     "tabs": {
       "code": "Code to MD",
       "issues": "Issues to MD"
