@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/v2/tooling/cli/schema.json",
   "productName": "Mergist",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "identifier": "Mergist",
   "build": {
     "beforeDevCommand": "npm run dev:ui",
@@ -28,18 +28,27 @@
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDIwRjNFNTNEMzBBMDQ1NzEKUldSeFJhQXdQZVh6SU5EY3hmS0IyV2l5Y1ZISGVFQzBFU244ZVFNUTRZS0tkTEZPbkh2RER5YmUK",
       "endpoints": [
         "https://github.com/FerrisMind/Mergist/releases/latest/download/latest.json"
-      ]
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
     }
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": "nsis",
+    "createUpdaterArtifacts": true,
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "windows": {
+      "webviewInstallMode": {
+        "type": "offlineInstaller"
+      }
+    }
   }
 }

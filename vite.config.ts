@@ -10,19 +10,37 @@ export default defineConfig({
   plugins: [
     svelte({
       compilerOptions: {
-        runes: true
-      }
+        runes: true,
+      },
     }),
-    tailwindcss()
+    tailwindcss(),
   ],
   resolve: {
     alias: {
-      $lib: path.resolve(__dirname, 'src/lib')
-    }
+      $lib: path.resolve(__dirname, 'src/lib'),
+    },
   },
   server: {
     port: 1420,
-    strictPort: true
+    strictPort: true,
   },
-  clearScreen: false
+  build: {
+    rollupOptions: {
+      external: ['fsevents'],
+      output: {
+        manualChunks: {
+          'vendor-svelte': ['svelte'],
+          'vendor-tauri': [
+            '@tauri-apps/api',
+            '@tauri-apps/plugin-dialog',
+            '@tauri-apps/plugin-fs',
+            '@tauri-apps/plugin-process',
+            '@tauri-apps/plugin-updater',
+          ],
+          'vendor-icons': ['@lucide/svelte'],
+        },
+      },
+    },
+  },
+  clearScreen: false,
 });
