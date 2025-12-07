@@ -1,0 +1,28 @@
+[package]
+name = "mergist"
+version = "0.1.0"
+edition = "2024"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tauri = { version = "2", features = [] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "time"] }
+tokio-util = { version = "0.7", features = [] }
+globset = "0.4"
+tempfile = "3.10"
+thiserror = "1.0"
+time = { version = "0.3", features = ["formatting", "local-offset"] }
+url = "2.5"
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+
+[profile.release]
+lto = true
+strip = true
+codegen-units = 1
+

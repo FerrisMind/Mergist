@@ -1,0 +1,15 @@
+{
+  "identifier": "default",
+  "description": "Default capabilities with window controls",
+  "windows": ["*"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-close",
+    "core:window:allow-minimize",
+    "dialog:default",
+    "dialog:allow-save",
+    "fs:write-all",
+    "fs:allow-temp-write",
+    "fs:allow-copy-file"
+  ]
+}

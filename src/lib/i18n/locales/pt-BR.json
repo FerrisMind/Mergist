@@ -1,0 +1,61 @@
+{
+  "app": {
+    "title": "Repo to Markdown — Desktop",
+    "tabs": {
+      "code": "Código para MD",
+      "issues": "Issues para MD"
+    },
+    "language": "Idioma",
+    "languageSelect": "Selecionar idioma",
+    "themeToggle": "Alternar tema",
+    "minimize": "Minimizar",
+    "close": "Fechar",
+    "about": "Sobre",
+    "aboutMessage": "{name}{version}"
+  },
+  "repoForm": {
+    "label": "Repositório GitHub",
+    "placeholder": "https://github.com/owner/repo ou owner/repo",
+    "invalid": "Formato de repositório inválido. Use owner/repo ou https://github.com/owner/repo"
+  },
+  "convertOptions": {
+    "skipLarge": "Ignorar arquivos grandes (>1MB)",
+    "removeLicenses": "Remover cabeçalhos de licença",
+    "patterns": "Padrões de exclusão",
+    "patternsCount": "{count} itens",
+    "placeholder": "*.lock\nnode_modules/*\n.git/*"
+  },
+  "issuesOptions": {
+    "includeOpen": "Incluir abertos",
+    "includeClosed": "Incluir fechados"
+  },
+  "actions": {
+    "convertCode": "Converter código para Markdown",
+    "convertIssues": "Converter issues para Markdown",
+    "converting": "Convertendo..."
+  },
+  "status": {
+    "loadingRepo": "Baixando repositório…",
+    "done": "Pronto",
+    "loadingIssues": "Baixando issues…",
+    "issuesExported": "Issues exportadas",
+    "saved": "Salvo em {path}"
+  },
+  "download": {
+    "file": "Arquivo",
+    "saveAs": "Salvar como…"
+  },
+  "stats": {
+    "filesProcessed": "Arquivos processados",
+    "lines": "Linhas",
+    "tokens": "Tokens (GPT)",
+    "totalFiles": "Total de arquivos",
+    "skippedFiles": "Arquivos ignorados",
+    "fileSize": "Tamanho do arquivo",
+    "issuesTotal": "Issues total",
+    "issuesOpen": "Abertas",
+    "issuesClosed": "Fechadas",
+    "lastUpdated": "Última atualização"
+  }
+}
+

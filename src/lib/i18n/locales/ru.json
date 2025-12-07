@@ -1,0 +1,61 @@
+{
+  "app": {
+    "title": "Repo to Markdown — Desktop",
+    "tabs": {
+      "code": "Код в MD",
+      "issues": "Issues в MD"
+    },
+    "language": "Язык",
+    "languageSelect": "Выбор языка",
+    "themeToggle": "Переключить тему",
+    "minimize": "Свернуть",
+    "close": "Закрыть",
+    "about": "О программе",
+    "aboutMessage": "{name}{version}"
+  },
+  "repoForm": {
+    "label": "GitHub репозиторий",
+    "placeholder": "https://github.com/owner/repo или owner/repo",
+    "invalid": "Некорректный формат репозитория. Используйте owner/repo или https://github.com/owner/repo"
+  },
+  "convertOptions": {
+    "skipLarge": "Пропускать большие файлы (>1MB)",
+    "removeLicenses": "Удалять лицензионные шапки",
+    "patterns": "Паттерны исключений",
+    "patternsCount": "{count} шт.",
+    "placeholder": "*.lock\nnode_modules/*\n.git/*"
+  },
+  "issuesOptions": {
+    "includeOpen": "Включать открытые",
+    "includeClosed": "Включать закрытые"
+  },
+  "actions": {
+    "convertCode": "Конвертировать код в Markdown",
+    "convertIssues": "Конвертировать issues в Markdown",
+    "converting": "Конвертация..."
+  },
+  "status": {
+    "loadingRepo": "Загрузка репозитория…",
+    "done": "Готово",
+    "loadingIssues": "Загрузка issues…",
+    "issuesExported": "Issues экспортированы",
+    "saved": "Сохранено в {path}"
+  },
+  "download": {
+    "file": "Файл",
+    "saveAs": "Сохранить как…"
+  },
+  "stats": {
+    "filesProcessed": "Файлов обработано",
+    "lines": "Строк",
+    "tokens": "Токены (GPT)",
+    "totalFiles": "Всего файлов",
+    "skippedFiles": "Пропущено файлов",
+    "fileSize": "Размер файла",
+    "issuesTotal": "Issues всего",
+    "issuesOpen": "Открытые",
+    "issuesClosed": "Закрытые",
+    "lastUpdated": "Последнее обновление"
+  }
+}
+
