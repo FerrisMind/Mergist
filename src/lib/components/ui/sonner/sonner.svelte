@@ -40,4 +40,17 @@
     order: unset !important;
     transform: none !important;
   }
+
+  /* Крупнее иконка и чуть больше отступ в тосте "О программе" */
+  :global(.toaster [data-sonner-toast].about-toast) {
+    column-gap: 0.9rem !important;
+  }
+  :global(.toaster [data-sonner-toast].about-toast [data-icon]) {
+    width: 2rem !important;
+    height: 2rem !important;
+  }
+  :global(.toaster [data-sonner-toast].about-toast [data-icon] > *) {
+    width: 100% !important;
+    height: 100% !important;
+  }
 </style>

@@ -15,6 +15,8 @@
   import ProgressBar from '$lib/components/ProgressBar.svelte';
   import StatsPanel from '$lib/components/StatsPanel.svelte';
   import DownloadSection from '$lib/components/DownloadSection.svelte';
+  import AboutToastIcon from '$lib/components/AboutToastIcon.svelte';
+  import AboutToastAction from '$lib/components/AboutToastAction.svelte';
   import { Toaster } from '$lib/components/ui/sonner';
   import { Spinner } from '$lib/components/ui/spinner';
   import Globe2Icon from '@lucide/svelte/icons/globe-2';
@@ -77,6 +79,8 @@
   const hasStats = $derived(Boolean(appState?.result || appState?.issuesResult));
   let aboutName = $state('Repo to Markdown');
   let aboutVersion = $state('');
+  const aboutDeveloper = 'FerrisMind';
+  const aboutLicense = 'Apache 2.0';
 
   const flushProgress = () => {
     if (!pendingProgress) {
@@ -381,12 +385,20 @@
 
   const handleAbout = () => {
     const versionText = aboutVersion ? ` v${aboutVersion}` : '';
-  toast($t('app.aboutMessage', { values: { name: aboutName, version: versionText } }), {
-    id: 'about-toast',
-    duration: Infinity,
-    class: 'about-toast',
-    closeButton: true,
-  });
+    const descriptionLines = [
+      $t('app.aboutDeveloper', { values: { developer: aboutDeveloper } }),
+      $t('app.aboutLicense', { values: { license: aboutLicense } }),
+    ];
+    toast($t('app.aboutMessage', { values: { name: aboutName, version: versionText } }), {
+      id: 'about-toast',
+      duration: Infinity,
+      class: 'about-toast',
+      closeButton: true,
+      icon: AboutToastIcon,
+      classes: { icon: 'mr-3 h-12 w-12 shrink-0' },
+      description: descriptionLines.join('\n'),
+      action: AboutToastAction,
+    });
   };
 </script>
 

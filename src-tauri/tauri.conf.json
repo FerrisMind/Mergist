@@ -22,7 +22,14 @@
       }
     ]
   },
-  "plugins": {},
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDIwRjNFNTNEMzBBMDQ1NzEKUldSeFJhQXdQZVh6SU5EY3hmS0IyV2l5Y1ZISGVFQzBFU244ZVFNUTRZS0tkTEZPbkh2RER5YmUK",
+      "endpoints": [
+        "https://github.com/FerrisMind/Mergist/releases/latest/download/latest.json"
+      ]
+    }
+  },
   "bundle": {
     "active": true,
     "targets": "all",

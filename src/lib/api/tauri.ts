@@ -1,7 +1,9 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
+import { relaunch } from '@tauri-apps/api/process';
 import { save } from '@tauri-apps/plugin-dialog';
 import { copyFile } from '@tauri-apps/plugin-fs';
+import { check as checkUpdate } from '@tauri-apps/plugin-updater';
 import type {
   ConversionResult,
   ConvertOptions,
@@ -82,4 +84,60 @@ export async function tokenizeFile(
   }
 
   return totalTokens;
+}
+
+export type UpdateDownloadProgress = {
+  event: string;
+  percent?: number;
+  downloadedBytes?: number;
+  totalBytes?: number;
+  bytesPerSecond?: number;
+};
+
+export type UpdateCheckResult = {
+  available: boolean;
+  version?: string;
+  downloadAndInstall?: (onProgress?: (progress: UpdateDownloadProgress) => void) => Promise<void>;
+};
+
+export async function checkForUpdates(): Promise<UpdateCheckResult> {
+  try {
+    const update = await checkUpdate();
+    if (!update || !update.available) {
+      return { available: false };
+    }
+    const version = update.version ?? update.manifest?.version;
+    return {
+      available: true,
+      version,
+      async downloadAndInstall(onProgress) {
+        await update.downloadAndInstall((event) => {
+          if (!onProgress) return;
+          if (event.event === 'Progress') {
+            const total = event.totalBytes ?? event.contentLength ?? 0;
+            const downloaded = event.downloadedBytes ?? 0;
+            const percent =
+              event.percent ??
+              (total > 0 ? Math.min(100, (downloaded / total) * 100) : undefined);
+            onProgress({
+              event: event.event,
+              percent,
+              downloadedBytes: downloaded,
+              totalBytes: total,
+              bytesPerSecond: event.bytesPerSecond,
+            });
+          } else {
+            onProgress({ event: event.event });
+          }
+        });
+      },
+    };
+  } catch (error) {
+    console.error('Update check failed', error);
+    throw error;
+  }
+}
+
+export async function restartApp(): Promise<void> {
+  await relaunch();
 }
