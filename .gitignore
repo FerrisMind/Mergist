@@ -1,0 +1,36 @@
+# Node / package managers
+node_modules
+.pnpm-store
+.pnp.*
+.pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Build output
+dist
+build
+.svelte-kit
+.vite
+coverage
+*.tsbuildinfo
+.eslintcache
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Tauri / Rust artifacts
+src-tauri/target
+src-tauri/.cargo
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.tmp
+.idea/
+.vscode/
