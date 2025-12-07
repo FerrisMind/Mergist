@@ -15,14 +15,13 @@ Cross‑platform desktop app that turns a GitHub repository into a Markdown expo
 
 ## Requirements
 - Node.js 20+ and npm
-- Rust toolchain for Tauri (see https://tauri.app/start/prerequisites/)
-- (Optional) `@tauri-apps/cli` installed globally for faster builds
+- Rust toolchain for Tauri (https://tauri.app/start/prerequisites/)
+- Tauri CLI installed once (e.g. `cargo install tauri-cli` or `npm add -D @tauri-apps/cli`)
 
 ## Getting started
 ```bash
-cd tauri-app
 npm install
-npm run dev          # launch Tauri + UI
+cargo tauri dev      # full Tauri app (backend + UI)
 ```
 
 Frontend-only dev server (Vite):
@@ -31,7 +30,8 @@ npm run dev:ui
 ```
 
 ## Scripts
-- `npm run dev` — Tauri dev (backend + UI)
+- `cargo tauri dev` — Tauri dev (backend + UI)
+- `npm run dev` — same as above via npm script
 - `npm run dev:ui` — Vite dev server only
 - `npm run build` — production desktop build via Tauri
 - `npm run build:ui` — build frontend only (`dist/`)

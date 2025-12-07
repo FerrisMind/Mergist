@@ -95,7 +95,7 @@
       type="button"
       data-button
       class="inline-flex items-center gap-2"
-      on:click={handleRestart}
+      onclick={handleRestart}
     >
       {$t('app.updateRestart')}
     </button>
@@ -108,7 +108,7 @@
         type="button"
         data-button
         class="inline-flex items-center gap-2"
-        on:click={handleInstall}
+        onclick={handleInstall}
         data-disabled={downloading}
         aria-busy={downloading}
       >
@@ -126,7 +126,7 @@
         type="button"
         data-button
         class="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
-        on:click={handleLater}
+        onclick={handleLater}
         data-disabled={downloading}
       >
         {$t('app.updateLater')}
@@ -137,7 +137,7 @@
       type="button"
       data-button
       class="inline-flex items-center gap-2"
-      on:click={handleCheck}
+      onclick={handleCheck}
       data-disabled={checking}
       aria-busy={checking}
     >

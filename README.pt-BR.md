@@ -16,13 +16,12 @@ Aplicativo desktop multiplataforma que transforma um repositório GitHub em um e
 ## Requisitos
 - Node.js 20+ e npm
 - Toolchain Rust para Tauri (https://tauri.app/start/prerequisites/)
-- (Opcional) `@tauri-apps/cli` global para builds mais rápidos
+- Tauri CLI instalado uma vez (`cargo install tauri-cli` ou `npm add -D @tauri-apps/cli`)
 
 ## Primeiros passos
 ```bash
-cd tauri-app
 npm install
-npm run dev          # inicia Tauri + UI
+cargo tauri dev      # inicia o app Tauri completo (backend + UI)
 ```
 
 Somente frontend (Vite):
@@ -31,7 +30,8 @@ npm run dev:ui
 ```
 
 ## Scripts
-- `npm run dev` — modo dev do Tauri (backend + UI)
+- `cargo tauri dev` — modo dev do Tauri (backend + UI)
+- `npm run dev` — o mesmo via script npm
 - `npm run dev:ui` — apenas Vite dev server
 - `npm run build` — build de produção via Tauri
 - `npm run build:ui` — build apenas do frontend (`dist/`)

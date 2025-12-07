@@ -5,6 +5,7 @@
   "identifier": "Mergist",
   "build": {
     "beforeDevCommand": "npm run dev:ui",
+    "beforeBuildCommand": "npm run build:ui",
     "devUrl": "http://localhost:1420",
     "frontendDist": "../dist"
   },

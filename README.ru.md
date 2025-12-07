@@ -16,13 +16,12 @@
 ## Требования
 - Node.js 20+ и npm
 - Rust toolchain для Tauri (https://tauri.app/start/prerequisites/)
-- (Опционально) `@tauri-apps/cli` глобально для быстрых сборок
+- Установленный Tauri CLI (один раз): `cargo install tauri-cli` или `npm add -D @tauri-apps/cli`
 
 ## Быстрый старт
 ```bash
-cd tauri-app
 npm install
-npm run dev          # запустить Tauri + UI
+cargo tauri dev      # запустить полное приложение Tauri (backend + UI)
 ```
 
 Только фронтенд (Vite):
@@ -31,7 +30,8 @@ npm run dev:ui
 ```
 
 ## Скрипты
-- `npm run dev` — dev-режим Tauri (бэкенд + UI)
+- `cargo tauri dev` — dev-режим Tauri (бэкенд + UI)
+- `npm run dev` — то же самое через npm-скрипт
 - `npm run dev:ui` — только Vite dev server
 - `npm run build` — продакшн-сборка через Tauri
 - `npm run build:ui` — сборка фронтенда (`dist/`)
