@@ -1,50 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 488 488">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 488 488">
   <defs>
-    <radialGradient id="radial-gradient" cx="244" cy="244" fx="244" fy="244" r="244" gradientUnits="userSpaceOnUse">
+    <style>
+      .cls-1 {
+        fill: url(#radial-gradient);
+      }
+
+      .cls-2 {
+        fill: none;
+      }
+
+      .cls-2, .cls-3 {
+        stroke: #a0d6e0;
+        stroke-linecap: round;
+        stroke-miterlimit: 10;
+        stroke-width: 20px;
+      }
+
+      .cls-3 {
+        fill: #a0d6e0;
+      }
+    </style>
+    <radialGradient id="radial-gradient" cx="244" cy="246" fx="244" fy="246" r="244" gradientTransform="translate(0 490) scale(1 -1)" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#374151"/>
       <stop offset="1" stop-color="#1f2937"/>
     </radialGradient>
-    <linearGradient id="New_Gradient_Swatch_1" data-name="New Gradient Swatch 1" x1="155.67" y1="198.67" x2="155.67" y2="360" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#4f46e5"/>
-      <stop offset="1" stop-color="#7c3aed"/>
-    </linearGradient>
-    <radialGradient id="radial-gradient-2" cx="102.67" cy="173.33" fx="102.67" fy="173.33" r="35.33" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#7c3aed"/>
-      <stop offset="1" stop-color="#4f46e5"/>
-    </radialGradient>
-    <radialGradient id="radial-gradient-3" cx="102.67" cy="173.33" fx="102.67" fy="173.33" r="45.33" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#783bec"/>
-      <stop offset="1" stop-color="#4f46e5"/>
-    </radialGradient>
-    <linearGradient id="New_Gradient_Swatch_1-2" data-name="New Gradient Swatch 1" x1="332.33" x2="332.33" xlink:href="#New_Gradient_Swatch_1"/>
-    <radialGradient id="radial-gradient-4" cx="385.33" cy="173.33" fx="385.33" fy="173.33" r="35.33" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#7c3aed"/>
-      <stop offset="1" stop-color="#5046e5"/>
-    </radialGradient>
-    <radialGradient id="radial-gradient-5" cx="385.33" cy="173.33" fx="385.33" fy="173.33" r="45.33" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#7c3aed"/>
-      <stop offset="1" stop-color="#4f46e5"/>
-    </radialGradient>
-    <radialGradient id="radial-gradient-6" cx="244" cy="314.67" fx="244" fy="314.67" r="35.33" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#4f46e5"/>
-      <stop offset="1" stop-color="#7c3aed"/>
-    </radialGradient>
-    <radialGradient id="radial-gradient-7" cx="244" cy="314.67" fx="244" fy="314.67" r="45.33" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#4f46e5"/>
-      <stop offset="1" stop-color="#7c3aed"/>
-    </radialGradient>
   </defs>
-  <g id="Layer_4" data-name="Layer 4">
-    <rect y="0" width="488" height="488" rx="128" ry="128" fill="url(#radial-gradient)"/>
-  </g>
-  <g id="Layer_3" data-name="Layer 3">
-    <g>
-      <path d="M102.67,350v-141.33c0,58.54,47.46,106,106,106" fill="none" stroke="url(#New_Gradient_Swatch_1)" stroke-linecap="round" stroke-linejoin="round" stroke-width="20"/>
-      <circle cx="102.67" cy="173.33" r="35.33" fill="url(#radial-gradient-2)" stroke="url(#radial-gradient-3)" stroke-linecap="round" stroke-linejoin="round" stroke-width="20"/>
-      <path d="M385.33,350v-141.33c0,58.54-47.46,106-106,106" fill="none" stroke="url(#New_Gradient_Swatch_1-2)" stroke-linecap="round" stroke-linejoin="round" stroke-width="20"/>
-      <circle cx="385.33" cy="173.33" r="35.33" fill="url(#radial-gradient-4)" stroke="url(#radial-gradient-5)" stroke-linecap="round" stroke-linejoin="round" stroke-width="20"/>
-      <circle cx="244" cy="314.67" r="35.33" fill="url(#radial-gradient-6)" stroke="url(#radial-gradient-7)" stroke-linecap="round" stroke-linejoin="round" stroke-width="20"/>
+  <!-- Generator: Adobe Illustrator 28.7.1, SVG Export Plug-In . SVG Version: 1.2.0 Build 142)  -->
+  <g>
+    <g id="Layer_1">
+      <g id="Layer_4">
+        <rect class="cls-1" width="488" height="488" rx="128" ry="128"/>
+      </g>
+      <g id="Layer_3">
+        <g>
+          <path class="cls-2" d="M102.7,350v-141.3c0,58.5,47.5,106,106,106"/>
+          <circle class="cls-3" cx="102.7" cy="173.3" r="35.3"/>
+          <path class="cls-2" d="M385.4,350v-141.3c0,58.5-47.5,106-106,106"/>
+          <circle class="cls-3" cx="385.4" cy="173.3" r="35.3"/>
+          <circle class="cls-3" cx="244" cy="314.6" r="35.3" transform="translate(-87.1 535.8) rotate(-85.9)"/>
+        </g>
+      </g>
     </g>
   </g>
 </svg>

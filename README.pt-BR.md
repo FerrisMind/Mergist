@@ -1,4 +1,4 @@
-# Mergist (Tauri + Svelte)
+![Mergist](.github/assets/logo.svg)
 
 Aplicativo desktop multiplataforma que transforma um repositório GitHub em um export Markdown (código e issues) com acompanhamento de progresso, temas e localização.
 

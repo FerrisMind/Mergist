@@ -1,8 +1,8 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
-import { relaunch } from '@tauri-apps/api/process';
 import { save } from '@tauri-apps/plugin-dialog';
 import { copyFile } from '@tauri-apps/plugin-fs';
+import { relaunch } from '@tauri-apps/plugin-process';
 import { check as checkUpdate } from '@tauri-apps/plugin-updater';
 import type {
   ConversionResult,
@@ -117,8 +117,7 @@ export async function checkForUpdates(): Promise<UpdateCheckResult> {
             const total = event.totalBytes ?? event.contentLength ?? 0;
             const downloaded = event.downloadedBytes ?? 0;
             const percent =
-              event.percent ??
-              (total > 0 ? Math.min(100, (downloaded / total) * 100) : undefined);
+              event.percent ?? (total > 0 ? Math.min(100, (downloaded / total) * 100) : undefined);
             onProgress({
               event: event.event,
               percent,

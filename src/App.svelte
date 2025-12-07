@@ -379,8 +379,12 @@
 
   onMount(() => {
     // ModeWatcher handles syncing theme; fetch app info for About dialog
-    getName().then((name) => (aboutName = name)).catch(() => {});
-    getVersion().then((version) => (aboutVersion = version)).catch(() => {});
+    getName()
+      .then((name) => (aboutName = name))
+      .catch(() => {});
+    getVersion()
+      .then((version) => (aboutVersion = version))
+      .catch(() => {});
   });
 
   const handleAbout = () => {
@@ -421,18 +425,10 @@
         data-tauri-drag-region="false"
       >
         <TabsList class="w-full max-w-full flex flex-nowrap gap-2 overflow-hidden">
-          <TabsTrigger
-            value="code"
-            class="truncate"
-            title={$t('app.tabs.code')}
-          >
+          <TabsTrigger value="code" class="truncate" title={$t('app.tabs.code')}>
             {$t('app.tabs.code')}
           </TabsTrigger>
-          <TabsTrigger
-            value="issues"
-            class="truncate"
-            title={$t('app.tabs.issues')}
-          >
+          <TabsTrigger value="issues" class="truncate" title={$t('app.tabs.issues')}>
             {$t('app.tabs.issues')}
           </TabsTrigger>
         </TabsList>

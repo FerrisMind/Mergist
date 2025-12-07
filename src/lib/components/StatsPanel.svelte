@@ -23,7 +23,6 @@
     tokenStatus?: 'idle' | 'running' | 'success' | 'error';
     tokenProgress?: number;
   } = $props();
-
 </script>
 
 {#if conversion}

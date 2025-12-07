@@ -12,7 +12,6 @@
     onChange?: (payload: { repo: string }) => void;
   } = $props();
 
-
   const handleSubmit = (e: Event) => {
     e.preventDefault();
     const value = repoUrl.trim();

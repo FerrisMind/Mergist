@@ -12,7 +12,6 @@
     onChange?: (payload: { includeOpenIssues: boolean; includeClosedIssues: boolean }) => void;
   } = $props();
 
-
   const emit = () => onChange?.({ includeOpenIssues, includeClosedIssues });
   $effect(() => emit());
 </script>

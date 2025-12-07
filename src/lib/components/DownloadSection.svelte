@@ -10,7 +10,6 @@
     onDownload?: (() => Promise<void>) | null;
   } = $props();
 
-
   const handleClick = (e: MouseEvent) => {
     e.preventDefault();
     onDownload?.();

@@ -1,6 +1,11 @@
 <script lang="ts">
   import { Spinner } from '$lib/components/ui/spinner';
-  import { checkForUpdates, restartApp, type UpdateCheckResult, type UpdateDownloadProgress } from '$lib/api/tauri';
+  import {
+    checkForUpdates,
+    restartApp,
+    type UpdateCheckResult,
+    type UpdateDownloadProgress,
+  } from '$lib/api/tauri';
   import { t } from '$lib/i18n';
   import { toast } from 'svelte-sonner';
 
@@ -86,7 +91,12 @@
 
 <div class="flex flex-col gap-2">
   {#if needsRestart}
-    <button type="button" data-button class="inline-flex items-center gap-2" on:click={handleRestart}>
+    <button
+      type="button"
+      data-button
+      class="inline-flex items-center gap-2"
+      on:click={handleRestart}
+    >
       {$t('app.updateRestart')}
     </button>
   {:else if availableVersion}
@@ -140,4 +150,3 @@
     </button>
   {/if}
 </div>
-

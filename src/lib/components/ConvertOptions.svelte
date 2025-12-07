@@ -20,7 +20,6 @@
     }) => void;
   } = $props();
 
-
   const emit = () =>
     onChange?.({
       skipLargeFiles,
