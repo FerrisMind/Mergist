@@ -42,6 +42,7 @@ jobs:
           sudo apt-get install -y \
             libwebkit2gtk-4.1-dev \
             build-essential \
+            lld \
             libssl-dev \
             libgtk-3-dev \
             libayatana-appindicator3-dev \
@@ -60,22 +61,48 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
         shell: bash
 
-      - name: Build and bundle
+      - name: Build and bundle (macOS universal)
+        if: matrix.platform == 'macos-latest'
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY || secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD || secrets.TAURI_KEY_PASSWORD }}
+        with:
+          tauriScript: npx tauri
+          args: --target universal-apple-darwin
+          artifactPath: |
+            src-tauri/target/**/bundle/**/*.dmg
+            src-tauri/target/**/bundle/**/*.app
+            src-tauri/target/**/bundle/**/*.app.tar.gz
+            src-tauri/target/**/bundle/**/*.sig
+          tagName: v${{ steps.app_version.outputs.version }}
+          releaseName: "Mergist v${{ steps.app_version.outputs.version }}"
+          releaseBody: "Черновик релиза со сборками для macOS, Windows и Linux."
+          releaseDraft: true
+          prerelease: false
+
+      - name: Build and bundle (Linux/Windows)
+        if: matrix.platform != 'macos-latest'
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY || secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD || secrets.TAURI_KEY_PASSWORD }}
         with:
           tauriScript: npx tauri
           artifactPath: |
-            src-tauri/target/release/bundle/**/*.AppImage
-            src-tauri/target/release/bundle/**/*.deb
-            src-tauri/target/release/bundle/**/*.rpm
-            src-tauri/target/release/bundle/**/*.dmg
-            src-tauri/target/release/bundle/**/*.msi
-            src-tauri/target/release/bundle/**/*.exe
-            src-tauri/target/release/bundle/**/*.app
+            src-tauri/target/**/bundle/**/*.AppImage
+            src-tauri/target/**/bundle/**/*.deb
+            src-tauri/target/**/bundle/**/*.rpm
+            src-tauri/target/**/bundle/**/*.dmg
+            src-tauri/target/**/bundle/**/*.msi
+            src-tauri/target/**/bundle/**/*.exe
+            src-tauri/target/**/bundle/**/*.app
           tagName: v${{ steps.app_version.outputs.version }}
           releaseName: "Mergist v${{ steps.app_version.outputs.version }}"
           releaseBody: "Черновик релиза со сборками для macOS, Windows и Linux."
