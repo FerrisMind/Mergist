@@ -23,7 +23,10 @@
     "updateInstall": "Установить",
     "updateLater": "Позже",
     "updateDownloading": "Скачиваем обновление...",
-    "updateRestart": "Перезапустите для завершения обновления"
+    "updateRestart": "Перезапустите для завершения обновления",
+    "updateAutoRestart": "Обновление установлено. Приложение перезапустится автоматически.",
+    "updateCancelled": "Обновление отменено",
+    "updateCancel": "Отменить"
   },
   "repoForm": {
     "label": "GitHub репозиторий",

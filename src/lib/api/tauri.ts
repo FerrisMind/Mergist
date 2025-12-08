@@ -98,6 +98,7 @@ export type UpdateCheckResult = {
   available: boolean;
   version?: string;
   downloadAndInstall?: (onProgress?: (progress: UpdateDownloadProgress) => void) => Promise<void>;
+  close?: () => Promise<void>;
 };
 
 export async function checkForUpdates(): Promise<UpdateCheckResult> {
@@ -110,6 +111,7 @@ export async function checkForUpdates(): Promise<UpdateCheckResult> {
     return {
       available: true,
       version,
+      close: () => update.close(),
       async downloadAndInstall(onProgress) {
         let total = 0;
         let downloaded = 0;

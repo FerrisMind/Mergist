@@ -23,7 +23,10 @@
     "updateInstall": "Instalar",
     "updateLater": "Depois",
     "updateDownloading": "Baixando atualização...",
-    "updateRestart": "Reinicie para concluir a atualização"
+    "updateRestart": "Reinicie para concluir a atualização",
+    "updateAutoRestart": "Atualização instalada. O app será reiniciado automaticamente.",
+    "updateCancelled": "Atualização cancelada",
+    "updateCancel": "Cancelar"
   },
   "repoForm": {
     "label": "Repositório GitHub",
