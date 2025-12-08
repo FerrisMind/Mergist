@@ -38,7 +38,8 @@
     "removeLicenses": "Remover cabeçalhos de licença",
     "patterns": "Padrões de exclusão",
     "patternsCount": "{count} itens",
-    "placeholder": "*.lock\nnode_modules/*\n.git/*"
+    "placeholder": "*.lock\nnode_modules/*\n.git/*",
+    "resetDefaults": "Restaurar padrões"
   },
   "issuesOptions": {
     "includeOpen": "Incluir abertos",

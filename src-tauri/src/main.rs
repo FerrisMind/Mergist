@@ -9,6 +9,7 @@ use commands::{
     ConversionState, cancel_conversion, convert_repo_to_markdown, export_issues, get_file_size,
     read_file_chunk,
 };
+use tauri::Manager;
 
 fn main() {
     tauri::Builder::default()
@@ -24,6 +25,14 @@ fn main() {
             read_file_chunk,
             get_file_size
         ])
+        .setup(|app| {
+            #[cfg(debug_assertions)]
+            if let Some(window) = app.get_webview_window("main") {
+                // Авто-открытие DevTools только в dev-сборках
+                window.open_devtools();
+            }
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

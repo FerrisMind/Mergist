@@ -28,7 +28,7 @@ pub fn generate_directory_tree(files: &[&FileEntry], subdirectory: Option<&str>)
         if !prefix.is_empty() && path.starts_with(prefix) {
             path = path.trim_start_matches(prefix).trim_start_matches('/');
         }
-        let parts: Vec<&str> = path.split('/').collect();
+        let parts: Vec<&str> = path.split('/').filter(|p| !p.is_empty()).collect();
         let mut current = &mut root;
         for (idx, part) in parts.iter().enumerate() {
             let is_last = idx == parts.len() - 1;

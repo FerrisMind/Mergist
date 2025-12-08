@@ -397,6 +397,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </svelte:head>
 
+<svelte:window on:contextmenu|preventDefault />
+
 <div class="h-screen bg-background text-foreground flex flex-col overflow-hidden">
   <Toaster position="bottom-center" closeButton richColors />
   <header class="sticky top-0 z-30 bg-background/80 backdrop-blur" data-tauri-drag-region>

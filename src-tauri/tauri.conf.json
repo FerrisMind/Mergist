@@ -14,14 +14,28 @@
       {
         "title": "Mergist",
         "width": 600,
-        "height": 708,
+        "height": 720,
         "resizable": false,
         "fullscreen": false,
         "maximizable": false,
         "decorations": false,
         "transparent": true
       }
-    ]
+    ],
+    "security": {
+      "csp": {
+        "default-src": "'self' asset: ipc: http://asset.localhost http://ipc.localhost",
+        "script-src": "'self'",
+        "style-src": "'self'",
+        "img-src": "'self' asset: http://asset.localhost data: blob:",
+        "connect-src": "ipc: http://ipc.localhost https://api.github.com https://raw.githubusercontent.com",
+        "font-src": "'self' data:",
+        "media-src": "'self' blob:",
+        "object-src": "'none'",
+        "frame-ancestors": "'none'"
+      },
+      "devCsp": "default-src 'self' asset: ipc: http://localhost:1420 http://asset.localhost http://ipc.localhost; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: http://asset.localhost blob: data:; connect-src 'self' ipc: ws://localhost:1420 http://localhost:1420 http://ipc.localhost https://api.github.com https://raw.githubusercontent.com; font-src 'self' data:; media-src 'self' blob:; object-src 'none'; frame-ancestors 'none'"
+    }
   },
   "plugins": {
     "updater": {

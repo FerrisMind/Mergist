@@ -38,7 +38,8 @@
     "removeLicenses": "Удалять лицензионные шапки",
     "patterns": "Паттерны исключений",
     "patternsCount": "{count} шт.",
-    "placeholder": "*.lock\nnode_modules/*\n.git/*"
+    "placeholder": "*.lock\nnode_modules/*\n.git/*",
+    "resetDefaults": "Сбросить по умолчанию"
   },
   "issuesOptions": {
     "includeOpen": "Включать открытые",

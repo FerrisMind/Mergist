@@ -25,6 +25,9 @@ export default defineConfig({
     strictPort: true,
   },
   build: {
+    target: 'es2022',
+    sourcemap: false,
+    reportCompressedSize: false,
     rollupOptions: {
       external: ['fsevents'],
       output: {
@@ -41,6 +44,15 @@ export default defineConfig({
         },
       },
     },
+  },
+  optimizeDeps: {
+    exclude: [
+      '@tauri-apps/api',
+      '@tauri-apps/plugin-dialog',
+      '@tauri-apps/plugin-fs',
+      '@tauri-apps/plugin-process',
+      '@tauri-apps/plugin-updater',
+    ],
   },
   clearScreen: false,
 });

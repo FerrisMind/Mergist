@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 import type { ConversionState, ConversionResult, IssuesExportResult, Tab } from '$lib/types';
 
-const DEFAULT_SKIP_PATTERNS = [
+export const DEFAULT_SKIP_PATTERNS = [
   'node_modules/',
   '.git/',
   '*.min.js',

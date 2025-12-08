@@ -111,14 +111,15 @@ pub async fn convert_repository_to_markdown(
         _ => format!("{}/{}", repo_info.owner, repo_info.repo),
     };
 
+    // Дерево каталога строим по тем файлам, что реально пойдут в экспорт
     let tree = generate_directory_tree(&filtered, repo_info.subdirectory.as_deref());
 
     let now = OffsetDateTime::now_local().unwrap_or_else(|_| OffsetDateTime::now_utc());
     let timestamp = now.format(&Rfc3339).unwrap_or_else(|_| "unknown".into());
 
     let branch = repo_info.branch.clone().unwrap_or_else(|| "unknown".into());
-    // Общее число файлов до фильтрации, чтобы метаданные совпадали с референсом
-    let total_files = files.len();
+    // Количество файлов, реально попавших в экспорт (после фильтрации)
+    let total_files = filtered.len();
 
     let header = format!(
         "This document contains the complete source code of the repository consolidated into a single file for streamlined AI analysis.\n\
@@ -175,7 +176,7 @@ The content is organized in the following sequence:\n\
         total_size_bytes: header.len() as u64,
         total_lines: header.lines().count() as u64,
         token_count: None,
-        total_files: Some(files.len() as u64),
+        total_files: Some(filtered.len() as u64),
     };
 
     for (idx, file) in filtered.iter().enumerate() {
