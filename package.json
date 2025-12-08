@@ -15,7 +15,8 @@
     "lint:eslint": "eslint . --ext .ts,.js,.svelte --report-unused-disable-directives --max-warnings=0",
     "lint:prettier": "prettier --check \"src/**/*.{ts,js,svelte,css,md}\"",
     "lint:svelte": "svelte-check --tsconfig ./tsconfig.json",
-    "format": "prettier --write \"src/**/*.{ts,js,svelte,css,md}\""
+    "format": "prettier --write \"src/**/*.{ts,js,svelte,css,md}\"",
+    "release:tag": "node scripts/release.js"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.9.1",
