@@ -97,3 +97,77 @@ jobs:
           path: src-tauri/target/**/bundle/**/*
           if-no-files-found: error
 
+  merge-latest-json:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Merge updater manifests
+        run: |
+          python - <<'PY'
+          import json, pathlib, sys
+
+          files = list(pathlib.Path("artifacts").rglob("latest*.json"))
+          if not files:
+              sys.exit("No latest*.json files found")
+
+          merged = {"version": None, "notes": None, "pub_date": None, "platforms": {}}
+          for p in files:
+              data = json.load(open(p))
+              if merged["version"] is None:
+                  for k in ("version", "notes", "pub_date"):
+                      merged[k] = data.get(k)
+              else:
+                  for k in ("version", "notes", "pub_date"):
+                      if data.get(k) and merged.get(k) and data[k] != merged[k]:
+                          print(f"warning: mismatch {k} in {p}")
+              for plat, meta in (data.get("platforms") or {}).items():
+                  merged["platforms"][plat] = meta
+
+          out = pathlib.Path("latest.json")
+          out.write_text(json.dumps(merged, indent=2), encoding="utf-8")
+          print(f"Merged {len(files)} files into {out} with {len(merged['platforms'])} platforms")
+          PY
+
+      - name: Upload merged latest.json
+        uses: actions/upload-artifact@v4
+        with:
+          name: latest-json
+          path: latest.json
+          if-no-files-found: error
+
+  release:
+    needs: merge-latest-json
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read app version
+        id: app_version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "Mergist v${{ steps.app_version.outputs.version }}"
+          draft: false
+          prerelease: false
+          files: release-artifacts/**/* ***!
+
