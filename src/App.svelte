@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { createBubbler, preventDefault } from 'svelte/legacy';
   import { onDestroy } from 'svelte';
   import { Tabs, TabsList, TabsTrigger, TabsContent, Button, Card } from '$lib/components/ui';
   import {
@@ -52,6 +53,8 @@
   import { getCurrentWindow } from '@tauri-apps/api/window';
   import { toast } from 'svelte-sonner';
   import { AVAILABLE_LOCALES, locale as localeStore, setupI18n, t } from '$lib/i18n';
+
+  const bubble = createBubbler();
 
   setupI18n();
   let appState = $state<ConversionState | null>(null);
@@ -397,7 +400,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </svelte:head>
 
-<svelte:window on:contextmenu|preventDefault />
+<svelte:window oncontextmenu={preventDefault(bubble('contextmenu'))} />
 
 <div class="h-screen bg-background text-foreground flex flex-col overflow-hidden">
   <Toaster position="bottom-center" closeButton richColors />
