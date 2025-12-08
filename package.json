@@ -7,6 +7,7 @@
     "dev": "tauri dev",
     "dev:ui": "vite dev --host --port 1420",
     "build": "npm run build:ui && tauri build",
+    "tauri": "tauri",
     "build:ui": "vite build",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
