@@ -50,7 +50,6 @@
   import { toggleMode } from 'mode-watcher';
   import { invoke } from '@tauri-apps/api/core';
   import { getCurrentWindow } from '@tauri-apps/api/window';
-  import { getName, getVersion } from '@tauri-apps/api/app';
   import { toast } from 'svelte-sonner';
   import { AVAILABLE_LOCALES, locale as localeStore, setupI18n, t } from '$lib/i18n';
 
@@ -78,10 +77,6 @@
     appState?.result?.file_path ?? appState?.issuesResult?.file_path ?? null
   );
   const hasStats = $derived(Boolean(appState?.result || appState?.issuesResult));
-  let aboutName = $state('Repo to Markdown');
-  let aboutVersion = $state('');
-  const aboutDeveloper = 'FerrisMind';
-  const aboutLicense = 'Apache 2.0';
 
   const flushProgress = () => {
     if (!pendingProgress) {
@@ -379,13 +374,7 @@
   const handleClose = () => win.close();
 
   onMount(() => {
-    // ModeWatcher handles syncing theme; fetch app info for About dialog
-    getName()
-      .then((name) => (aboutName = name))
-      .catch(() => {});
-    getVersion()
-      .then((version) => (aboutVersion = version))
-      .catch(() => {});
+    // ModeWatcher handles syncing theme
   });
 
   const handleAbout = () => {
@@ -395,7 +384,7 @@
       class: 'about-toast',
       closeButton: true,
       icon: AboutToastIcon,
-      classes: { icon: 'mr-3 h-12 w-12 shrink-0' },
+      classes: { icon: 'ml-2 mr-3 h-12 w-12 shrink-0' },
       description: AboutToastBadges,
       action: AboutToastAction,
     });

@@ -31,9 +31,8 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 0.35rem;
-    margin-left: 6.5rem;
+    margin-left: 1rem;
     margin-top: 0;
     min-height: 2.4rem;
   }
 </style>
-

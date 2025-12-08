@@ -47,26 +47,32 @@
     align-items: center !important;
   }
   :global(.toaster [data-sonner-toast].about-toast [data-icon]) {
-    width: 7rem !important;
-    height: 3rem !important;
+    width: 7rem;
+    height: 3rem;
+    margin-left: 0.75rem;
   }
   :global(.toaster [data-sonner-toast].about-toast [data-icon] > *) {
-    width: 100% !important;
-    height: 100% !important;
+    width: 100%;
+    height: 100%;
   }
 
   /* Убираем «приподнимание» тостов при наведении (expanded state) */
-  :global(.toaster [data-sonner-toast][data-expanded='true']:not([data-removed='true']):not(
-      [data-swipe-out='true']
-    ):not([data-swiping='true'])) {
+  :global(
+    .toaster
+      [data-sonner-toast][data-expanded='true']:not([data-removed='true']):not(
+        [data-swipe-out='true']
+      ):not([data-swiping='true'])
+  ) {
     /* сохраняем исходное положение стека даже при expanded */
-    --y: translateY(calc(var(--lift-amount) * var(--toasts-before))) !important;
-    height: auto !important;
-    transform: var(--y) !important;
+    --y: translateY(calc(var(--lift-amount) * var(--toasts-before)));
+    height: auto;
+    transform: var(--y);
   }
-  :global(.toaster [data-sonner-toast][data-expanded='true'][data-front='false'][data-styled='true'])
+  :global(
+      .toaster [data-sonner-toast][data-expanded='true'][data-front='false'][data-styled='true']
+    )
     > :global(*) {
-    opacity: 0 !important;
+    opacity: 0;
   }
 
   /* Крупнее заголовок для тоста "О программе" */

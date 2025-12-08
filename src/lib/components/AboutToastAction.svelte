@@ -7,7 +7,6 @@
   } from '$lib/api/tauri';
   import { t } from '$lib/i18n';
   import { toast } from 'svelte-sonner';
-  import Badge from '$lib/components/ui/badge/badge.svelte';
 
   let checking = $state(false);
   let downloading = $state(false);
