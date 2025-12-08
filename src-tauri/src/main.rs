@@ -27,8 +27,8 @@ fn main() {
         ])
         .setup(|app| {
             #[cfg(debug_assertions)]
+            // Авто-открытие DevTools только в dev-сборках
             if let Some(window) = app.get_webview_window("main") {
-                // Авто-открытие DevTools только в dev-сборках
                 window.open_devtools();
             }
             Ok(())

@@ -31,14 +31,14 @@
       return;
     }
 
-    const variantFn =
-      variant === 'success'
-        ? toast.success
-        : variant === 'warning'
-          ? toast.warning
-          : variant === 'error'
-            ? toast.error
-            : toast;
+    const variantMap = {
+      success: toast.success,
+      warning: toast.warning,
+      error: toast.error,
+      info: toast,
+    } as const;
+
+    const variantFn = variantMap[variant] ?? toast;
     variantFn(message, { id: toastId });
   };
 

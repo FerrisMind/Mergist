@@ -12,8 +12,15 @@
     onChange?: (payload: { includeOpenIssues: boolean; includeClosedIssues: boolean }) => void;
   } = $props();
 
+  let lastSnapshot = '';
   const emit = () => onChange?.({ includeOpenIssues, includeClosedIssues });
-  $effect(() => emit());
+
+  $effect(() => {
+    const snapshot = `${includeOpenIssues}|${includeClosedIssues}`;
+    if (snapshot === lastSnapshot) return;
+    lastSnapshot = snapshot;
+    emit();
+  });
 </script>
 
 <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-4">

@@ -75,7 +75,6 @@
     });
     return () => unsubLocale();
   });
-  let localeMenuOpen = $state(false);
   const filePath = $derived(
     appState?.result?.file_path ?? appState?.issuesResult?.file_path ?? null
   );
@@ -118,6 +117,86 @@
   };
 
   const invalidRepoMessage = () => $t('repoForm.invalid');
+
+  const setErrorState = (message: string) =>
+    conversionStore.update((s) => ({
+      ...s,
+      status: 'error',
+      message,
+      error: message,
+    }));
+
+  const parseSkipPatterns = (patternsStr: string | undefined | null) => {
+    const trimmed = (patternsStr ?? '').trim();
+    if (!trimmed.length) return [];
+    return trimmed
+      .split('\n')
+      .map((p) => p.trim())
+      .filter(Boolean);
+  };
+
+  const ensureValidRepo = () => {
+    const repoValidation = normalizeRepoInput(appState?.repoUrl ?? '');
+    if (repoValidation.ok === false) {
+      const message = repoValidation.error;
+      setErrorState(message);
+      return null;
+    }
+    return repoValidation.repo;
+  };
+
+  const startOperation = (repoToUse: string, message: string) =>
+    conversionStore.update((s) => ({
+      ...s,
+      repoUrl: repoToUse,
+      status: 'running',
+      message,
+      error: null,
+      result: null,
+      issuesResult: null,
+      progress: { current: 0, total: 0 },
+      tokenStatus: 'idle',
+      tokenProgress: 0,
+    }));
+
+  const withRepo = async (run: (repo: string) => Promise<void>) => {
+    const repoToUse = ensureValidRepo();
+    if (!repoToUse) return;
+    await run(repoToUse);
+  };
+
+  const updateStatusToSuccess = (message: string) =>
+    conversionStore.update((s) => ({
+      ...s,
+      status: 'success',
+      message,
+      progress: {
+        current: s.progress.total || s.progress.current,
+        total: s.progress.total || s.progress.current,
+      },
+    }));
+
+  const updateStatusToError = (err: unknown) =>
+    conversionStore.update((s) => ({
+      ...s,
+      status: 'error',
+      message: String(err),
+      error: String(err),
+    }));
+
+  const cleanupProgressListener = () => {
+    if (unlistenProgress) {
+      unlistenProgress();
+      unlistenProgress = null;
+    }
+  };
+
+  const updateProgressListener = async (channel: 'conversion-progress' | 'issues-progress') => {
+    cleanupProgressListener();
+    unlistenProgress = await listenConversionProgress(channel, (current, total) => {
+      scheduleProgressUpdate(current, total);
+    });
+  };
 
   const normalizeRepoInput = (
     input: string
@@ -170,151 +249,53 @@
   };
 
   const handleConvert = async () => {
-    const repoValidation = normalizeRepoInput(appState?.repoUrl ?? '');
-    if (repoValidation.ok === false) {
-      const message = repoValidation.error;
-      conversionStore.update((s) => ({
-        ...s,
-        status: 'error',
-        message,
-        error: message,
-      }));
-      return;
-    }
-    const repoToUse = repoValidation.repo;
+    await withRepo(async (repoToUse) => {
+      startOperation(repoToUse, $t('status.loadingRepo'));
+      await updateProgressListener('conversion-progress');
 
-    conversionStore.update((s) => ({
-      ...s,
-      repoUrl: repoToUse,
-      status: 'running',
-      message: $t('status.loadingRepo'),
-      error: null,
-      result: null,
-      issuesResult: null,
-      progress: { current: 0, total: 0 },
-      tokenStatus: 'idle',
-      tokenProgress: 0,
-    }));
+      const options: ConvertOpts = {
+        include_filenames: true,
+        add_separators: true,
+        skip_large_files: appState?.skipLargeFiles ?? true,
+        remove_license_headers: appState?.removeLicenseHeaders ?? true,
+        // если пустая строка — отправляем пустой массив (значит без исключений)
+        skip_patterns: parseSkipPatterns(appState?.skipPatterns),
+      };
 
-    if (unlistenProgress) {
-      unlistenProgress();
-      unlistenProgress = null;
-    }
-    unlistenProgress = await listenConversionProgress('conversion-progress', (current, total) => {
-      scheduleProgressUpdate(current, total);
-    });
-
-    const patternsStr = appState?.skipPatterns ?? '';
-    const skipPatternsArr = patternsStr.trim().length
-      ? patternsStr
-          .split('\n')
-          .map((p) => p.trim())
-          .filter(Boolean)
-      : [];
-
-    const options: ConvertOpts = {
-      include_filenames: true,
-      add_separators: true,
-      skip_large_files: appState?.skipLargeFiles ?? true,
-      remove_license_headers: appState?.removeLicenseHeaders ?? true,
-      // если пустая строка — отправляем пустой массив (значит без исключений)
-      skip_patterns: skipPatternsArr,
-    };
-
-    try {
-      const result = await convertRepo(repoToUse, options);
-      setResult(result);
-      conversionStore.update((s) => ({
-        ...s,
-        status: 'success',
-        message: $t('status.done'),
-        progress: {
-          current: s.progress.total || s.progress.current,
-          total: s.progress.total || s.progress.current,
-        },
-      }));
-      await runTokenization(result.file_path, false);
-    } catch (err) {
-      conversionStore.update((s) => ({
-        ...s,
-        status: 'error',
-        message: String(err),
-        error: String(err),
-      }));
-    } finally {
-      if (unlistenProgress) {
-        unlistenProgress();
-        unlistenProgress = null;
+      try {
+        const result = await convertRepo(repoToUse, options);
+        setResult(result);
+        updateStatusToSuccess($t('status.done'));
+        await runTokenization(result.file_path, false);
+      } catch (err) {
+        updateStatusToError(err);
+      } finally {
+        cleanupProgressListener();
       }
-    }
+    });
   };
 
   const handleIssues = async () => {
-    const repoValidation = normalizeRepoInput(appState?.repoUrl ?? '');
-    if (repoValidation.ok === false) {
-      const message = repoValidation.error;
-      conversionStore.update((s) => ({
-        ...s,
-        status: 'error',
-        message,
-        error: message,
-      }));
-      return;
-    }
-    const repoToUse = repoValidation.repo;
+    await withRepo(async (repoToUse) => {
+      startOperation(repoToUse, $t('status.loadingIssues'));
+      await updateProgressListener('issues-progress');
 
-    conversionStore.update((s) => ({
-      ...s,
-      repoUrl: repoToUse,
-      status: 'running',
-      message: $t('status.loadingIssues'),
-      error: null,
-      result: null,
-      issuesResult: null,
-      progress: { current: 0, total: 0 },
-      tokenStatus: 'idle',
-      tokenProgress: 0,
-    }));
+      const options: IssuesExportOptions = {
+        include_open: appState?.includeOpenIssues ?? true,
+        include_closed: appState?.includeClosedIssues ?? true,
+      };
 
-    if (unlistenProgress) {
-      unlistenProgress();
-      unlistenProgress = null;
-    }
-    unlistenProgress = await listenConversionProgress('issues-progress', (current, total) => {
-      scheduleProgressUpdate(current, total);
-    });
-
-    const options: IssuesExportOptions = {
-      include_open: appState?.includeOpenIssues ?? true,
-      include_closed: appState?.includeClosedIssues ?? true,
-    };
-
-    try {
-      const result = await exportIssues(repoToUse, options);
-      setIssuesResult(result);
-      conversionStore.update((s) => ({
-        ...s,
-        status: 'success',
-        message: $t('status.issuesExported'),
-        progress: {
-          current: s.progress.total || s.progress.current,
-          total: s.progress.total || s.progress.current,
-        },
-      }));
-      await runTokenization(result.file_path, true);
-    } catch (err) {
-      conversionStore.update((s) => ({
-        ...s,
-        status: 'error',
-        message: String(err),
-        error: String(err),
-      }));
-    } finally {
-      if (unlistenProgress) {
-        unlistenProgress();
-        unlistenProgress = null;
+      try {
+        const result = await exportIssues(repoToUse, options);
+        setIssuesResult(result);
+        updateStatusToSuccess($t('status.issuesExported'));
+        await runTokenization(result.file_path, true);
+      } catch (err) {
+        updateStatusToError(err);
+      } finally {
+        cleanupProgressListener();
       }
-    }
+    });
   };
 
   const runTokenization = async (filePath: string, isIssues: boolean) => {
@@ -425,14 +406,13 @@
       </Tabs>
       <div class="flex items-center gap-0 shrink-0">
         <div class="flex items-center gap-2" data-tauri-drag-region="false">
-          <DropdownMenu bind:open={localeMenuOpen}>
+          <DropdownMenu>
             <DropdownMenuTrigger>
               <Button
                 variant="ghost"
                 size="sm"
                 class="h-8 px-2 flex items-center gap-2 border border-transparent hover:border-border data-[state=open]:border-border data-[state=open]:bg-accent/30 dark:data-[state=open]:bg-accent/50 data-[state=open]:text-accent-foreground transition-colors"
                 aria-label={$t('app.languageSelect')}
-                data-state={localeMenuOpen ? 'open' : 'closed'}
               >
                 <Globe2Icon class="h-4 w-4" />
                 <span class="text-sm"
