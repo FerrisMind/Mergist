@@ -71,8 +71,9 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY || secrets.TAURI_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD || secrets.TAURI_KEY_PASSWORD }}
         with:
+          projectPath: src-tauri
           tauriScript: npx tauri
-          args: --target universal-apple-darwin
+          args: build --target universal-apple-darwin
           includeRelease: false
           includeDebug: false
 
@@ -86,15 +87,34 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY || secrets.TAURI_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD || secrets.TAURI_KEY_PASSWORD }}
         with:
+          projectPath: src-tauri
           tauriScript: npx tauri
+          args: build
           includeRelease: false
           includeDebug: false
+
+      - name: Collect bundled artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob globstar
+          mkdir -p bundle-out
+          files=(src-tauri/target/**/bundle/**/*)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No bundle files found; listing target tree for diagnostics"
+            find src-tauri/target -maxdepth 5 -type f || true
+            exit 1
+          fi
+          for f in "${files[@]}"; do
+            if [ -f "$f" ]; then cp "$f" bundle-out/; fi
+          done
+          ls -l bundle-out
 
       - name: Upload bundled artifacts
         uses: actions/upload-artifact@v4
         with:
           name: mergist-${{ matrix.platform }}-artifacts
-          path: src-tauri/target/**/bundle/**/*
+          path: bundle-out/*
           if-no-files-found: error
 
   merge-latest-json:
