@@ -9,6 +9,7 @@ use commands::{
     ConversionState, cancel_conversion, convert_repo_to_markdown, export_issues, get_file_size,
     read_file_chunk,
 };
+#[cfg(debug_assertions)]
 use tauri::Manager;
 
 fn main() {
@@ -26,10 +27,16 @@ fn main() {
             get_file_size
         ])
         .setup(|app| {
+            #[cfg(not(debug_assertions))]
+            {
+                let _ = &app;
+            }
             #[cfg(debug_assertions)]
-            // Авто-открытие DevTools только в dev-сборках
-            if let Some(window) = app.get_webview_window("main") {
-                window.open_devtools();
+            {
+                // Авто-открытие DevTools только в dev-сборках
+                if let Some(window) = app.get_webview_window("main") {
+                    window.open_devtools();
+                }
             }
             Ok(())
         })

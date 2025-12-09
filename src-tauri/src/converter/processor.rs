@@ -16,6 +16,48 @@ use crate::models::{ConversionResult, ConvertOptions, DomainError, FileEntry, Re
 const SEPARATOR: &str =
     "================================================================================";
 
+fn write_content_block(
+    file: &mut NamedTempFile,
+    content: &str,
+    stats: &mut Stats,
+) -> Result<(), DomainError> {
+    file.write_all(content.as_bytes())
+        .map_err(|e| DomainError::Io(e.to_string()))?;
+    stats.total_size_bytes += content.len() as u64;
+    stats.total_lines += content.lines().count() as u64;
+    Ok(())
+}
+
+fn write_separator_line(file: &mut NamedTempFile, stats: &mut Stats) -> Result<(), DomainError> {
+    file.write_all(SEPARATOR.as_bytes())
+        .and_then(|_| file.write_all(b"\n"))
+        .map_err(|e| DomainError::Io(e.to_string()))?;
+    stats.total_size_bytes += SEPARATOR.len() as u64 + 1;
+    stats.total_lines += 1;
+    Ok(())
+}
+
+fn write_filename_line(
+    file: &mut NamedTempFile,
+    path: &str,
+    stats: &mut Stats,
+) -> Result<(), DomainError> {
+    let line = format!("// File: {}\n", path);
+    file.write_all(line.as_bytes())
+        .map_err(|e| DomainError::Io(e.to_string()))?;
+    stats.total_size_bytes += line.len() as u64;
+    stats.total_lines += 1;
+    Ok(())
+}
+
+fn write_newline(file: &mut NamedTempFile, stats: &mut Stats) -> Result<(), DomainError> {
+    file.write_all(b"\n")
+        .map_err(|e| DomainError::Io(e.to_string()))?;
+    stats.total_size_bytes += 1;
+    stats.total_lines += 1;
+    Ok(())
+}
+
 pub fn remove_license_headers(content: &str) -> String {
     let license_keywords = ["license", "copyright", "mit", "apache", "gpl", "bsd"];
     let lines: Vec<&str> = content.lines().collect();
@@ -166,18 +208,15 @@ The content is organized in the following sequence:\n\
     );
 
     let mut temp_file = NamedTempFile::new().map_err(|e| DomainError::Io(e.to_string()))?;
-    temp_file
-        .write_all(header.as_bytes())
-        .map_err(|e| DomainError::Io(e.to_string()))?;
-
     let mut stats = Stats {
         files_processed: 0,
         files_skipped: (files.len() - filtered.len()) as u64,
-        total_size_bytes: header.len() as u64,
-        total_lines: header.lines().count() as u64,
+        total_size_bytes: 0,
+        total_lines: 0,
         token_count: None,
         total_files: Some(filtered.len() as u64),
     };
+    write_content_block(&mut temp_file, &header, &mut stats)?;
 
     for (idx, file) in filtered.iter().enumerate() {
         if cancel.is_cancelled() {
@@ -201,27 +240,13 @@ The content is organized in the following sequence:\n\
         };
 
         if options.add_separators {
-            temp_file
-                .write_all(SEPARATOR.as_bytes())
-                .and_then(|_| temp_file.write_all(b"\n"))
-                .map_err(|e| DomainError::Io(e.to_string()))?;
-            stats.total_size_bytes += SEPARATOR.len() as u64 + 1;
-            stats.total_lines += 1;
+            write_separator_line(&mut temp_file, &mut stats)?;
         }
 
         if options.include_filenames {
-            temp_file
-                .write_all(format!("// File: {}\n", file.path).as_bytes())
-                .map_err(|e| DomainError::Io(e.to_string()))?;
-            stats.total_size_bytes += format!("// File: {}\n", file.path).as_bytes().len() as u64;
-            stats.total_lines += 1;
+            write_filename_line(&mut temp_file, &file.path, &mut stats)?;
             if options.add_separators {
-                temp_file
-                    .write_all(SEPARATOR.as_bytes())
-                    .and_then(|_| temp_file.write_all(b"\n"))
-                    .map_err(|e| DomainError::Io(e.to_string()))?;
-                stats.total_size_bytes += SEPARATOR.len() as u64 + 1;
-                stats.total_lines += 1;
+                write_separator_line(&mut temp_file, &mut stats)?;
             }
         }
 
@@ -229,18 +254,10 @@ The content is organized in the following sequence:\n\
             processed.push('\n');
         }
 
-        temp_file
-            .write_all(processed.as_bytes())
-            .map_err(|e| DomainError::Io(e.to_string()))?;
-        stats.total_size_bytes += processed.len() as u64;
-        stats.total_lines += processed.lines().count() as u64;
+        write_content_block(&mut temp_file, &processed, &mut stats)?;
 
         if options.add_separators {
-            temp_file
-                .write_all(b"\n")
-                .map_err(|e| DomainError::Io(e.to_string()))?;
-            stats.total_size_bytes += 1;
-            stats.total_lines += 1;
+            write_newline(&mut temp_file, &mut stats)?;
         }
 
         stats.files_processed += 1;
