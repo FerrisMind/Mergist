@@ -48,14 +48,16 @@
   "actions": {
     "convertCode": "Convert Code to Markdown",
     "convertIssues": "Convert Issues to Markdown",
-    "converting": "Converting..."
+    "converting": "Converting...",
+    "cancelConversion": "Cancel conversion"
   },
   "status": {
     "loadingRepo": "Downloading repository…",
     "done": "Done",
     "loadingIssues": "Downloading issues…",
     "issuesExported": "Issues exported",
-    "saved": "Saved to {path}"
+    "saved": "Saved to {path}",
+    "cancelled": "Operation cancelled"
   },
   "download": {
     "file": "File",

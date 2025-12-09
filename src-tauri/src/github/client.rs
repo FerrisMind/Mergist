@@ -41,9 +41,7 @@ impl GitHubClient {
         branch: &str,
         cancel: &CancellationToken,
     ) -> Result<Vec<FileEntry>, DomainError> {
-        if cancel.is_cancelled() {
-            return Err(DomainError::Cancelled);
-        }
+        ensure_not_cancelled(cancel)?;
 
         let url =
             format!("https://api.github.com/repos/{owner}/{repo}/git/trees/{branch}?recursive=1");
@@ -71,34 +69,34 @@ impl GitHubClient {
             .await
             .map_err(|e| DomainError::Unexpected(e.to_string()))?;
 
-        let Some(tree_items) = data.get("tree").and_then(|t| t.as_array()) else {
-            return Err(DomainError::Unexpected(
-                "Malformed GitHub Trees response".into(),
-            ));
-        };
+        let tree_items = data
+            .get("tree")
+            .and_then(|t| t.as_array())
+            .ok_or_else(|| DomainError::Unexpected("Malformed GitHub Trees response".into()))?;
 
         let mut files = Vec::new();
         for item in tree_items {
-            if item
+            ensure_not_cancelled(cancel)?;
+
+            let is_blob = item
                 .get("type")
                 .and_then(|t| t.as_str())
                 .map(|t| t == "blob")
-                .unwrap_or(false)
-            {
-                if cancel.is_cancelled() {
-                    return Err(DomainError::Cancelled);
-                }
+                .unwrap_or(false);
 
-                let path = item
-                    .get("path")
-                    .and_then(|p| p.as_str())
-                    .unwrap_or_default()
-                    .to_string();
-
-                let size = item.get("size").and_then(|s| s.as_u64()).unwrap_or(0);
-
-                files.push(FileEntry { path, size });
+            if !is_blob {
+                continue;
             }
+
+            let path = item
+                .get("path")
+                .and_then(|p| p.as_str())
+                .unwrap_or_default()
+                .to_string();
+
+            let size = item.get("size").and_then(|s| s.as_u64()).unwrap_or(0);
+
+            files.push(FileEntry { path, size });
         }
 
         if files.is_empty() {
@@ -116,9 +114,7 @@ impl GitHubClient {
         path: &str,
         cancel: &CancellationToken,
     ) -> Result<String, DomainError> {
-        if cancel.is_cancelled() {
-            return Err(DomainError::Cancelled);
-        }
+        ensure_not_cancelled(cancel)?;
 
         let url = format!("https://raw.githubusercontent.com/{owner}/{repo}/{branch}/{path}");
 
@@ -129,9 +125,7 @@ impl GitHubClient {
             .await
             .map_err(|e| DomainError::Network(e.to_string()))?;
 
-        if cancel.is_cancelled() {
-            return Err(DomainError::Cancelled);
-        }
+        ensure_not_cancelled(cancel)?;
 
         if response.status() == reqwest::StatusCode::NOT_FOUND {
             return Err(DomainError::NotFound);
@@ -148,5 +142,13 @@ impl GitHubClient {
             .text()
             .await
             .map_err(|e| DomainError::Unexpected(e.to_string()))
+    }
+}
+
+fn ensure_not_cancelled(cancel: &CancellationToken) -> Result<(), DomainError> {
+    if cancel.is_cancelled() {
+        Err(DomainError::Cancelled)
+    } else {
+        Ok(())
     }
 }

@@ -84,47 +84,7 @@ pub async fn fetch_issues(
             break;
         }
 
-        for item in &page_items {
-            // пропускаем PR
-            if item.pull_request.is_some() {
-                continue;
-            }
-            let labels = item
-                .labels
-                .as_ref()
-                .unwrap_or(&Vec::new())
-                .iter()
-                .filter_map(|l| l.name.clone())
-                .collect();
-            let assignees = item
-                .assignees
-                .as_ref()
-                .unwrap_or(&Vec::new())
-                .iter()
-                .filter_map(|u| u.login.clone())
-                .collect();
-
-            let issue = Issue {
-                number: item.number,
-                title: item.title.clone(),
-                state: item.state.clone(),
-                author: item.user.as_ref().and_then(|u| u.login.clone()),
-                created_at: item.created_at.clone(),
-                updated_at: item.updated_at.clone(),
-                closed_at: item.closed_at.clone(),
-                comments: item.comments,
-                labels,
-                milestone: item.milestone.as_ref().and_then(|m| m.title.clone()),
-                assignees,
-                body: item.body.clone(),
-                html_url: item.html_url.clone(),
-            };
-            all.push(issue);
-        }
-
-        if all.len() as u32 >= PER_PAGE * page {
-            // continue if page full
-        }
+        all.extend(page_items.iter().filter_map(to_issue));
 
         if page_items.len() < PER_PAGE as usize {
             break;
@@ -136,4 +96,45 @@ pub async fn fetch_issues(
     }
 
     Ok((all, truncated))
+}
+
+fn labels_from(item: &IssueResponse) -> Vec<String> {
+    item.labels
+        .as_deref()
+        .unwrap_or(&[])
+        .iter()
+        .filter_map(|label| label.name.clone())
+        .collect()
+}
+
+fn assignees_from(item: &IssueResponse) -> Vec<String> {
+    item.assignees
+        .as_deref()
+        .unwrap_or(&[])
+        .iter()
+        .filter_map(|user| user.login.clone())
+        .collect()
+}
+
+fn to_issue(item: &IssueResponse) -> Option<Issue> {
+    // пропускаем PR
+    if item.pull_request.is_some() {
+        return None;
+    }
+
+    Some(Issue {
+        number: item.number,
+        title: item.title.clone(),
+        state: item.state.clone(),
+        author: item.user.as_ref().and_then(|u| u.login.clone()),
+        created_at: item.created_at.clone(),
+        updated_at: item.updated_at.clone(),
+        closed_at: item.closed_at.clone(),
+        comments: item.comments,
+        labels: labels_from(item),
+        milestone: item.milestone.as_ref().and_then(|m| m.title.clone()),
+        assignees: assignees_from(item),
+        body: item.body.clone(),
+        html_url: item.html_url.clone(),
+    })
 }

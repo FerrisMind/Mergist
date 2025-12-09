@@ -24,6 +24,80 @@ pub fn filter_issues<'a>(issues: &'a [Issue], opts: &IssuesExportOptions) -> Vec
         .collect()
 }
 
+fn included_states_label(opts: &IssuesExportOptions) -> &'static str {
+    match (opts.include_open, opts.include_closed) {
+        (true, true) => "Open, Closed",
+        (true, false) => "Open",
+        (false, true) => "Closed",
+        _ => "None",
+    }
+}
+
+fn join_or_none(values: &[String]) -> String {
+    if values.is_empty() {
+        "None".to_string()
+    } else {
+        values.join(", ")
+    }
+}
+
+fn format_issue_entry(issue: &Issue) -> String {
+    let labels = join_or_none(&issue.labels);
+    let milestone = issue.milestone.clone().unwrap_or_else(|| "None".into());
+    let assignees = join_or_none(&issue.assignees);
+    let comments = issue.comments.unwrap_or(0);
+
+    let mut content = format!(
+        "\n## #{}: {}\n\n- **State:** {}\n- **Author:** {}\n- **Created:** {}\n- **Updated:** {}\n- **Closed:** {}\n- **Comments:** {}\n- **Labels:** {}\n- **Milestone:** {}\n- **Assignees:** {}\n- **URL:** {}\n",
+        issue.number,
+        issue.title,
+        issue.state.to_uppercase(),
+        issue.author.clone().unwrap_or_else(|| "Unknown".into()),
+        issue.created_at.clone().unwrap_or_else(|| "N/A".into()),
+        issue.updated_at.clone().unwrap_or_else(|| "N/A".into()),
+        issue.closed_at.clone().unwrap_or_else(|| "N/A".into()),
+        comments,
+        labels,
+        milestone,
+        assignees,
+        issue.html_url.clone().unwrap_or_else(|| "N/A".into())
+    );
+
+    if let Some(body) = &issue.body {
+        if !body.trim().is_empty() {
+            content.push_str("\n### Description\n\n");
+            content.push_str(body);
+            content.push('\n');
+        } else {
+            content.push_str("\n_No description provided._\n");
+        }
+    } else {
+        content.push_str("\n_No description provided._\n");
+    }
+
+    content.push_str("\n---\n");
+    content
+}
+
+fn build_issues_header(
+    repo: &RepoInfo,
+    generated: &str,
+    issues: &[&Issue],
+    open_count: usize,
+    closed_count: usize,
+    included_states: &str,
+) -> String {
+    format!(
+        "# Issues Export for {}/{}\n\n- **Generated:** {generated}\n- **Total Issues:** {}\n- **Open Issues:** {}\n- **Closed Issues:** {}\n- **Included States:** {}\n\nThis document consolidates GitHub issues into a single Markdown file for review, backups, or AI ingestion.\n",
+        repo.owner,
+        repo.repo,
+        issues.len(),
+        open_count,
+        closed_count,
+        included_states
+    )
+}
+
 fn generate_issues_markdown(
     repo: &RepoInfo,
     issues: &[&Issue],
@@ -36,21 +110,15 @@ fn generate_issues_markdown(
     let open_count = issues.iter().filter(|i| i.state == "open").count();
     let closed_count = issues.iter().filter(|i| i.state == "closed").count();
 
-    let included_states = match (opts.include_open, opts.include_closed) {
-        (true, true) => "Open, Closed",
-        (true, false) => "Open",
-        (false, true) => "Closed",
-        _ => "None",
-    };
+    let included_states = included_states_label(opts);
 
-    let mut content = format!(
-        "# Issues Export for {}/{}\n\n- **Generated:** {generated}\n- **Total Issues:** {}\n- **Open Issues:** {}\n- **Closed Issues:** {}\n- **Included States:** {}\n\nThis document consolidates GitHub issues into a single Markdown file for review, backups, or AI ingestion.\n",
-        repo.owner,
-        repo.repo,
-        issues.len(),
+    let mut content = build_issues_header(
+        repo,
+        &generated,
+        issues,
         open_count,
         closed_count,
-        included_states
+        included_states,
     );
 
     if truncated {
@@ -68,48 +136,7 @@ fn generate_issues_markdown(
     content.push_str("\n---\n");
 
     for issue in issues {
-        let labels = if issue.labels.is_empty() {
-            "None".to_string()
-        } else {
-            issue.labels.join(", ")
-        };
-        let milestone = issue.milestone.clone().unwrap_or_else(|| "None".into());
-        let assignees = if issue.assignees.is_empty() {
-            "None".to_string()
-        } else {
-            issue.assignees.join(", ")
-        };
-        let comments = issue.comments.unwrap_or(0);
-
-        content.push_str(&format!(
-      "\n## #{}: {}\n\n- **State:** {}\n- **Author:** {}\n- **Created:** {}\n- **Updated:** {}\n- **Closed:** {}\n- **Comments:** {}\n- **Labels:** {}\n- **Milestone:** {}\n- **Assignees:** {}\n- **URL:** {}\n",
-      issue.number,
-      issue.title,
-      issue.state.to_uppercase(),
-      issue.author.clone().unwrap_or_else(|| "Unknown".into()),
-      issue.created_at.clone().unwrap_or_else(|| "N/A".into()),
-      issue.updated_at.clone().unwrap_or_else(|| "N/A".into()),
-      issue.closed_at.clone().unwrap_or_else(|| "N/A".into()),
-      comments,
-      labels,
-      milestone,
-      assignees,
-      issue.html_url.clone().unwrap_or_else(|| "N/A".into())
-    ));
-
-        if let Some(body) = &issue.body {
-            if !body.trim().is_empty() {
-                content.push_str("\n### Description\n\n");
-                content.push_str(body);
-                content.push('\n');
-            } else {
-                content.push_str("\n_No description provided._\n");
-            }
-        } else {
-            content.push_str("\n_No description provided._\n");
-        }
-
-        content.push_str("\n---\n");
+        content.push_str(&format_issue_entry(issue));
     }
 
     content

@@ -1,7 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { save } from '@tauri-apps/plugin-dialog';
-import { copyFile } from '@tauri-apps/plugin-fs';
+import { copyFile, remove } from '@tauri-apps/plugin-fs';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { check as checkUpdate, type DownloadEvent } from '@tauri-apps/plugin-updater';
 import type {
@@ -40,6 +40,10 @@ export async function exportIssues(
     input: { repo },
     options,
   });
+}
+
+export async function cancelConversion(): Promise<void> {
+  await invoke('cancel_conversion');
 }
 
 export async function downloadFile(
@@ -158,4 +162,15 @@ export async function checkForUpdates(): Promise<UpdateCheckResult> {
 
 export async function restartApp(): Promise<void> {
   await relaunch();
+}
+
+export async function deleteFiles(paths: string[]): Promise<void> {
+  const unique = Array.from(new Set(paths.filter(Boolean)));
+  for (const path of unique) {
+    try {
+      await remove(path);
+    } catch (error) {
+      console.warn('Failed to remove file', path, error);
+    }
+  }
 }

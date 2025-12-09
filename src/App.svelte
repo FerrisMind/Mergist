@@ -36,15 +36,19 @@
   } from '$lib/stores/conversion';
   import {
     downloadFile,
+    deleteFiles,
     listenConversionProgress,
     tokenizeFile,
     convertRepo,
     exportIssues,
+    cancelConversion,
   } from '$lib/api/tauri';
   import type {
+    ConversionResult,
     ConversionState,
     ConvertOptions as ConvertOpts,
     IssuesExportOptions,
+    IssuesExportResult,
     Tab,
   } from '$lib/types';
   import { ModeWatcher } from 'mode-watcher';
@@ -80,6 +84,14 @@
   );
   const hasStats = $derived(Boolean(appState?.result || appState?.issuesResult));
 
+  let cancelRequested = false;
+  let cancelHandled = false;
+
+  const resetCancelFlags = () => {
+    cancelRequested = false;
+    cancelHandled = false;
+  };
+
   const flushProgress = () => {
     if (!pendingProgress) {
       progressRaf = null;
@@ -109,11 +121,87 @@
     conversionStore.update((s) => ({ ...s, tokenProgress: percent }));
   };
 
+  type RepoTaskConfig<Options, Result> = {
+    startMessage: string;
+    successMessage: string;
+    progressChannel: 'conversion-progress' | 'issues-progress';
+    buildOptions: () => Options;
+    run: (repo: string, options: Options) => Promise<Result>;
+    applyResult: (result: Result) => void;
+    afterSuccess: (result: Result) => Promise<void>;
+  };
+
+  const buildConvertOptions = (): ConvertOpts => ({
+    include_filenames: true,
+    add_separators: true,
+    skip_large_files: appState?.skipLargeFiles ?? true,
+    remove_license_headers: appState?.removeLicenseHeaders ?? true,
+    // если пустая строка — отправляем пустой массив (значит без исключений)
+    skip_patterns: parseSkipPatterns(appState?.skipPatterns),
+  });
+
+  const buildIssuesOptions = (): IssuesExportOptions => ({
+    include_open: appState?.includeOpenIssues ?? true,
+    include_closed: appState?.includeClosedIssues ?? true,
+  });
+
+  async function runRepoTask<Options, Result>({
+    startMessage,
+    successMessage,
+    progressChannel,
+    buildOptions,
+    run,
+    applyResult,
+    afterSuccess,
+  }: RepoTaskConfig<Options, Result>) {
+    await withRepo(async (repoToUse) => {
+      resetCancelFlags();
+      startOperation(repoToUse, startMessage);
+      await updateProgressListener(progressChannel);
+
+      const options = buildOptions();
+
+      try {
+        const result = await run(repoToUse, options);
+        if (cancelRequested) {
+          await applyCancellationState();
+          return;
+        }
+        applyResult(result);
+        updateStatusToSuccess(successMessage);
+        await afterSuccess(result);
+      } catch (err) {
+        if (cancelRequested) {
+          await applyCancellationState();
+          return;
+        }
+        updateStatusToError(err);
+      } finally {
+        if (!cancelHandled) {
+          cleanupProgressListener();
+        }
+      }
+    });
+  }
+
   const scheduleTokenUpdate = (percent: number) => {
     pendingToken = percent;
     if (tokenRaf === null) {
       tokenRaf = requestAnimationFrame(flushToken);
     }
+  };
+
+  const cancelAnimations = () => {
+    if (progressRaf !== null) {
+      cancelAnimationFrame(progressRaf);
+      progressRaf = null;
+    }
+    if (tokenRaf !== null) {
+      cancelAnimationFrame(tokenRaf);
+      tokenRaf = null;
+    }
+    pendingProgress = null;
+    pendingToken = null;
   };
 
   const invalidRepoMessage = () => $t('repoForm.invalid');
@@ -158,6 +246,32 @@
       tokenStatus: 'idle',
       tokenProgress: 0,
     }));
+
+  const collectGeneratedPaths = () => {
+    const paths: string[] = [];
+    if (appState?.result?.file_path) paths.push(appState.result.file_path);
+    if (appState?.issuesResult?.file_path) paths.push(appState.issuesResult.file_path);
+    return paths;
+  };
+
+  const applyCancellationState = async () => {
+    if (cancelHandled) return;
+    cancelHandled = true;
+    cancelAnimations();
+    cleanupProgressListener();
+    await deleteFiles(collectGeneratedPaths());
+    conversionStore.update((s) => ({
+      ...s,
+      status: 'idle',
+      tokenStatus: 'idle',
+      progress: { current: 0, total: 0 },
+      tokenProgress: 0,
+      message: $t('status.cancelled'),
+      error: null,
+      result: null,
+      issuesResult: null,
+    }));
+  };
 
   const withRepo = async (run: (repo: string) => Promise<void>) => {
     const repoToUse = ensureValidRepo();
@@ -248,57 +362,30 @@
     resetState(tab as Tab);
   };
 
-  const handleConvert = async () => {
-    await withRepo(async (repoToUse) => {
-      startOperation(repoToUse, $t('status.loadingRepo'));
-      await updateProgressListener('conversion-progress');
-
-      const options: ConvertOpts = {
-        include_filenames: true,
-        add_separators: true,
-        skip_large_files: appState?.skipLargeFiles ?? true,
-        remove_license_headers: appState?.removeLicenseHeaders ?? true,
-        // если пустая строка — отправляем пустой массив (значит без исключений)
-        skip_patterns: parseSkipPatterns(appState?.skipPatterns),
-      };
-
-      try {
-        const result = await convertRepo(repoToUse, options);
-        setResult(result);
-        updateStatusToSuccess($t('status.done'));
-        await runTokenization(result.file_path, false);
-      } catch (err) {
-        updateStatusToError(err);
-      } finally {
-        cleanupProgressListener();
-      }
+  const handleConvert = async () =>
+    runRepoTask<ConvertOpts, ConversionResult>({
+      startMessage: $t('status.loadingRepo'),
+      successMessage: $t('status.done'),
+      progressChannel: 'conversion-progress',
+      buildOptions: buildConvertOptions,
+      run: convertRepo,
+      applyResult: setResult,
+      afterSuccess: (result) => runTokenization(result.file_path, false),
     });
-  };
 
-  const handleIssues = async () => {
-    await withRepo(async (repoToUse) => {
-      startOperation(repoToUse, $t('status.loadingIssues'));
-      await updateProgressListener('issues-progress');
-
-      const options: IssuesExportOptions = {
-        include_open: appState?.includeOpenIssues ?? true,
-        include_closed: appState?.includeClosedIssues ?? true,
-      };
-
-      try {
-        const result = await exportIssues(repoToUse, options);
-        setIssuesResult(result);
-        updateStatusToSuccess($t('status.issuesExported'));
-        await runTokenization(result.file_path, true);
-      } catch (err) {
-        updateStatusToError(err);
-      } finally {
-        cleanupProgressListener();
-      }
+  const handleIssues = async () =>
+    runRepoTask<IssuesExportOptions, IssuesExportResult>({
+      startMessage: $t('status.loadingIssues'),
+      successMessage: $t('status.issuesExported'),
+      progressChannel: 'issues-progress',
+      buildOptions: buildIssuesOptions,
+      run: exportIssues,
+      applyResult: setIssuesResult,
+      afterSuccess: (result) => runTokenization(result.file_path, true),
     });
-  };
 
   const runTokenization = async (filePath: string, isIssues: boolean) => {
+    if (cancelRequested) return;
     conversionStore.update((s) => ({
       ...s,
       tokenStatus: 'running',
@@ -307,9 +394,14 @@
     try {
       const readChunk = (offset: number, size: number) =>
         invoke<string | null>('read_file_chunk', { path: filePath, offset, size });
-      const tokens = await tokenizeFile(filePath, readChunk, (percent) =>
-        scheduleTokenUpdate(percent)
-      );
+      const tokens = await tokenizeFile(filePath, readChunk, (percent) => {
+        if (cancelRequested) return;
+        scheduleTokenUpdate(percent);
+      });
+      if (cancelRequested) {
+        await applyCancellationState();
+        return;
+      }
       conversionStore.update((s) => {
         if (isIssues && s.issuesResult) {
           return {
@@ -333,6 +425,10 @@
         return { ...s, tokenStatus: 'success', tokenProgress: 100 };
       });
     } catch (err) {
+      if (cancelRequested) {
+        await applyCancellationState();
+        return;
+      }
       conversionStore.update((s) => ({
         ...s,
         tokenStatus: 'error',
@@ -356,6 +452,17 @@
 
   const handleMinimize = () => win.minimize();
   const handleClose = () => win.close();
+
+  const handleCancel = async () => {
+    cancelRequested = true;
+    try {
+      await cancelConversion();
+    } catch (err) {
+      updateStatusToError(err);
+      return;
+    }
+    await applyCancellationState();
+  };
 
   onMount(() => {
     // ModeWatcher handles syncing theme
@@ -514,16 +621,14 @@
                     }))}
                 />
 
-                <div
-                  class="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-center sm:justify-start"
-                >
+                <div class="flex flex-row flex-wrap items-center justify-center gap-6 -translate-y-2">
                   <Button
                     onclick={(e) => {
                       e.preventDefault();
                       handleConvert();
                     }}
                     disabled={appState?.status === 'running'}
-                    class="w-full sm:w-auto sm:min-w-[220px] -translate-y-1"
+                    class="min-w-[220px] h-11"
                   >
                     {#if appState?.status === 'running'}
                       <Spinner class="size-4" />
@@ -531,6 +636,17 @@
                     {:else}
                       {$t('actions.convertCode')}
                     {/if}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onclick={(e) => {
+                      e.preventDefault();
+                      handleCancel();
+                    }}
+                    disabled={appState?.status !== 'running'}
+                    class="min-w-[220px] h-11"
+                  >
+                    {$t('actions.cancelConversion')}
                   </Button>
                 </div>
 
@@ -569,16 +685,14 @@
                     }))}
                 />
 
-                <div
-                  class="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-center sm:justify-start"
-                >
+                <div class="flex flex-row flex-wrap items-center justify-center gap-6 -translate-y-2">
                   <Button
                     onclick={(e) => {
                       e.preventDefault();
                       handleIssues();
                     }}
                     disabled={appState?.status === 'running'}
-                    class="w-full sm:w-auto sm:min-w-[220px]"
+                    class="min-w-[220px] h-11"
                   >
                     {#if appState?.status === 'running'}
                       <Spinner class="size-4" />

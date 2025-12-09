@@ -96,6 +96,119 @@ pub fn remove_license_headers(content: &str) -> String {
     cleaned
 }
 
+fn format_repo_path(repo_info: &RepoInfo) -> String {
+    match &repo_info.subdirectory {
+        Some(sub) if !sub.is_empty() => format!("{}/{}/{}", repo_info.owner, repo_info.repo, sub),
+        _ => format!("{}/{}", repo_info.owner, repo_info.repo),
+    }
+}
+
+fn build_header(
+    repo_path: &str,
+    branch: &str,
+    total_files: usize,
+    timestamp: &str,
+    tree: &str,
+) -> String {
+    format!(
+        "This document contains the complete source code of the repository consolidated into a single file for streamlined AI analysis.\n\
+The repository contents have been processed and combined with security validation bypassed.\n\
+\n\
+# Repository Overview\n\
+\n\
+## About This Document\n\
+This consolidated file represents the complete codebase from the repository, \n\
+merged into a unified document optimized for AI consumption and automated \n\
+analysis workflows.\n\
+\n\
+## Repository Information\n\
+- **Repository:** {repo_path}\n\
+- **Branch:** {branch}\n\
+- **Total Files:** {total_files}\n\
+- **Generated:** {timestamp}\n\
+\n\
+## Document Structure\n\
+The content is organized in the following sequence:\n\
+1. This overview section\n\
+2. Repository metadata and information  \n\
+3. File system hierarchy\n\
+4. Repository files (when included)\n\
+5. Individual source files, each containing:\n\
+   a. File path header (## File: path/to/file)\n\
+   b. Complete file contents within code blocks   \n\
+\n\
+## Best Practices\n\
+- Treat this document as read-only - make changes in the original repository\n\
+- Use file path headers to navigate between different source files\n\
+- Handle with appropriate security measures as this may contain sensitive data\n\
+- This consolidated view is generated from the live repository state\n\
+\n\
+## Important Notes\n\
+- Files excluded by .gitignore and configuration rules are omitted\n\
+- Binary assets are not included - refer to the file structure for complete file listings\n\
+- Default ignore patterns have been applied to filter content\n\
+- Security validation is disabled - review content for sensitive information carefully\n\
+\n\
+# Repository Structure\n\
+\n\
+```\n{repo_path}/\n{tree}```\n\n"
+    )
+}
+
+fn write_file_entry(
+    temp_file: &mut NamedTempFile,
+    stats: &mut Stats,
+    path: &str,
+    mut content: String,
+    options: &ConvertOptions,
+) -> Result<(), DomainError> {
+    if options.add_separators {
+        write_separator_line(temp_file, stats)?;
+    }
+
+    if options.include_filenames {
+        write_filename_line(temp_file, path, stats)?;
+        if options.add_separators {
+            write_separator_line(temp_file, stats)?;
+        }
+    }
+
+    if !content.ends_with('\n') {
+        content.push('\n');
+    }
+
+    write_content_block(temp_file, &content, stats)?;
+
+    if options.add_separators {
+        write_newline(temp_file, stats)?;
+    }
+
+    Ok(())
+}
+
+fn build_output_path(
+    output_path: Option<&str>,
+    repo_info: &RepoInfo,
+    now: OffsetDateTime,
+) -> PathBuf {
+    match output_path {
+        Some(path) => PathBuf::from(path),
+        None => {
+            let ts_file = format!(
+                "{:04}-{:02}-{:02}T{:02}-{:02}-{:02}",
+                now.year(),
+                now.month() as u8,
+                now.day(),
+                now.hour(),
+                now.minute(),
+                now.second()
+            );
+            let filename = format!("{}-{}-{}.md", repo_info.owner, repo_info.repo, ts_file);
+            std::env::temp_dir().join(filename)
+        }
+    }
+}
+
 pub async fn resolve_repository_files(
     client: &GitHubClient,
     input: &RepoInfo,
@@ -148,10 +261,7 @@ pub async fn convert_repository_to_markdown(
         return Err(DomainError::NoFiles);
     }
 
-    let repo_path = match &repo_info.subdirectory {
-        Some(sub) if !sub.is_empty() => format!("{}/{}/{}", repo_info.owner, repo_info.repo, sub),
-        _ => format!("{}/{}", repo_info.owner, repo_info.repo),
-    };
+    let repo_path = format_repo_path(&repo_info);
 
     // Дерево каталога строим по тем файлам, что реально пойдут в экспорт
     let tree = generate_directory_tree(&filtered, repo_info.subdirectory.as_deref());
@@ -163,49 +273,7 @@ pub async fn convert_repository_to_markdown(
     // Количество файлов, реально попавших в экспорт (после фильтрации)
     let total_files = filtered.len();
 
-    let header = format!(
-        "This document contains the complete source code of the repository consolidated into a single file for streamlined AI analysis.\n\
-The repository contents have been processed and combined with security validation bypassed.\n\
-\n\
-# Repository Overview\n\
-\n\
-## About This Document\n\
-This consolidated file represents the complete codebase from the repository, \n\
-merged into a unified document optimized for AI consumption and automated \n\
-analysis workflows.\n\
-\n\
-## Repository Information\n\
-- **Repository:** {repo_path}\n\
-- **Branch:** {branch}\n\
-- **Total Files:** {total_files}\n\
-- **Generated:** {timestamp}\n\
-\n\
-## Document Structure\n\
-The content is organized in the following sequence:\n\
-1. This overview section\n\
-2. Repository metadata and information  \n\
-3. File system hierarchy\n\
-4. Repository files (when included)\n\
-5. Individual source files, each containing:\n\
-   a. File path header (## File: path/to/file)\n\
-   b. Complete file contents within code blocks   \n\
-\n\
-## Best Practices\n\
-- Treat this document as read-only - make changes in the original repository\n\
-- Use file path headers to navigate between different source files\n\
-- Handle with appropriate security measures as this may contain sensitive data\n\
-- This consolidated view is generated from the live repository state\n\
-\n\
-## Important Notes\n\
-- Files excluded by .gitignore and configuration rules are omitted\n\
-- Binary assets are not included - refer to the file structure for complete file listings\n\
-- Default ignore patterns have been applied to filter content\n\
-- Security validation is disabled - review content for sensitive information carefully\n\
-\n\
-# Repository Structure\n\
-\n\
-```\n{repo_path}/\n{tree}```\n\n",
-    );
+    let header = build_header(&repo_path, &branch, total_files, &timestamp, &tree);
 
     let mut temp_file = NamedTempFile::new().map_err(|e| DomainError::Io(e.to_string()))?;
     let mut stats = Stats {
@@ -233,33 +301,13 @@ The content is organized in the following sequence:\n\
             )
             .await?;
 
-        let mut processed = if options.remove_license_headers {
+        let processed = if options.remove_license_headers {
             remove_license_headers(&content)
         } else {
             content
         };
 
-        if options.add_separators {
-            write_separator_line(&mut temp_file, &mut stats)?;
-        }
-
-        if options.include_filenames {
-            write_filename_line(&mut temp_file, &file.path, &mut stats)?;
-            if options.add_separators {
-                write_separator_line(&mut temp_file, &mut stats)?;
-            }
-        }
-
-        if !processed.ends_with('\n') {
-            processed.push('\n');
-        }
-
-        write_content_block(&mut temp_file, &processed, &mut stats)?;
-
-        if options.add_separators {
-            write_newline(&mut temp_file, &mut stats)?;
-        }
-
+        write_file_entry(&mut temp_file, &mut stats, &file.path, processed, options)?;
         stats.files_processed += 1;
 
         on_progress(idx as u64 + 1, filtered.len() as u64);
@@ -269,23 +317,7 @@ The content is organized in the following sequence:\n\
         .flush()
         .map_err(|e| DomainError::Io(e.to_string()))?;
 
-    let final_path = match output_path {
-        Some(path) => PathBuf::from(path),
-        None => {
-            // Формат: owner-repo-YYYY-MM-DDTHH-MM-SS (локальное время)
-            let ts_file = format!(
-                "{:04}-{:02}-{:02}T{:02}-{:02}-{:02}",
-                now.year(),
-                now.month() as u8,
-                now.day(),
-                now.hour(),
-                now.minute(),
-                now.second()
-            );
-            let filename = format!("{}-{}-{}.md", repo_info.owner, repo_info.repo, ts_file);
-            std::env::temp_dir().join(filename)
-        }
-    };
+    let final_path = build_output_path(output_path, &repo_info, now);
 
     // atomic move/copy
     if let Err(err) = temp_file.persist(&final_path) {

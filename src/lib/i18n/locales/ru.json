@@ -48,14 +48,16 @@
   "actions": {
     "convertCode": "Конвертировать код в Markdown",
     "convertIssues": "Конвертировать issues в Markdown",
-    "converting": "Конвертация..."
+    "converting": "Конвертация...",
+    "cancelConversion": "Прервать и очистить"
   },
   "status": {
     "loadingRepo": "Загрузка репозитория…",
     "done": "Готово",
     "loadingIssues": "Загрузка issues…",
     "issuesExported": "Issues экспортированы",
-    "saved": "Сохранено в {path}"
+    "saved": "Сохранено в {path}",
+    "cancelled": "Операция отменена"
   },
   "download": {
     "file": "Файл",
