@@ -23,6 +23,10 @@ export default defineConfig({
   server: {
     port: 1420,
     strictPort: true,
+    watch: {
+      // Cargo writes thousands of files under target/ during `tauri dev`.
+      ignored: ['**/src-tauri/**'],
+    },
   },
   build: {
     target: 'es2022',
