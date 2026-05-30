@@ -6,6 +6,10 @@
 
 Aplicativo desktop multiplataforma que transforma um repositório GitHub em um export Markdown (código e issues) com acompanhamento de progresso, temas e localização.
 
+## Demo
+
+<video src=".github/assets/demo.mp4" controls width="600"></video>
+
 ## Recursos
 - Converte repositórios em um único Markdown com separadores opcionais e listagem de arquivos.
 - Exporta GitHub Issues com formato de nome de arquivo configurável.

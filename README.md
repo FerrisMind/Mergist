@@ -6,6 +6,10 @@
 
 Cross‑platform desktop app that turns a GitHub repository into a Markdown export (code and issues) with progress tracking, theming, and built‑in localization.
 
+## Demo
+
+<video src=".github/assets/demo.mp4" controls width="600"></video>
+
 ## Features
 - Convert repositories to a single Markdown export with optional separators and filename listings.
 - Export GitHub issues with configurable filename formatting.
