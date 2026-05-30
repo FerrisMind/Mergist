@@ -8,7 +8,7 @@
 
 ## Демо
 
-<video src=".github/assets/demo.mp4" controls width="600"></video>
+<video src="https://github.com/user-attachments/assets/bd2f786e-7e4f-4e25-8030-efb32e667bb2" controls width="600"></video>
 
 ## Возможности
 - Конвертация репозитория в единый Markdown с опциональными разделителями и перечнем файлов.
